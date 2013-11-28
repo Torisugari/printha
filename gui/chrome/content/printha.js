@@ -52,16 +52,15 @@ var gPrinthaSettings = {
 
   get addressData() {
     if (this.isDirectInput) {
-      return document.getElementById("sendto.name").value + ";" +
-             document.getElementById("sendto.zipcode").value + ";" +
-             document.getElementById("sendto.address").value;
+      return this.directInputData;
     }
 
     var length = this._addressData.length;
     var hono = this.hono;
-    var data = this.formatLine(this._addressData[0], hono);
+    var extra = this.isExtraEnabled;
+    var data = this.formatLine(this._addressData[0], hono, extra);
     for (var i = 1; i < length; i++) {
-      var temp = this.formatLine(this._addressData[i], hono);
+      var temp = this.formatLine(this._addressData[i], hono, extra);
       if (temp) {
         data += "|" + temp;
       }
@@ -69,14 +68,24 @@ var gPrinthaSettings = {
     return data;
   },
 
+  get directInputData() {
+    var data = document.getElementById("sendto.name").value + ";" +
+               document.getElementById("sendto.zipcode").value + ";" +
+               document.getElementById("sendto.address").value;
+    if (this.isExtraEnabled) {
+      for (var i = 0; i < 6; i++) {
+        data += ";" + document.getElementById("sendto.extra[" + i + "]").value;
+      }
+    }
+    return data;
+  },
+
   get firstAddressData() {
     if (this.isDirectInput) {
-      return document.getElementById("sendto.name").value + ";" +
-             document.getElementById("sendto.zipcode").value + ";" +
-             document.getElementById("sendto.address").value;
+      this.directInputData;
     }
 
-    return this.formatLine(this._addressData[0], this.hono);
+    return this.formatLine(this._addressData[0], this.hono, this.isExtraEnabled);
   },
 
   set sendfromData(aData) {
@@ -106,7 +115,7 @@ var gPrinthaSettings = {
     return val;
   },
 
-  formatLine: function (aLine, aHonorifics) {
+  formatLine: function (aLine, aHonorifics, aExtra) {
     if (!aLine || aLine.length < 4) {
       return "";
     }
@@ -114,6 +123,10 @@ var gPrinthaSettings = {
                         + aLine[2] + ";" + aLine[3];
     if (aLine.length > 4 && aLine[4]) {
       data += "\n" + aLine[4];
+    }
+
+    if (!aExtra) {
+      return data;
     }
 
     var length = ((5 + 6) < aLine.length )? (5 + 6) : aLine.length;
