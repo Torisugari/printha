@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://printha/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://printha/content/rectbox.css" type="text/css"?>
 
 <window title="Printha"
         xmlns:html="http://www.w3.org/1999/xhtml"
@@ -23,9 +24,9 @@
     </tabs>
     <tabpanels>
       <tabpanel orient="vertical">
-          <checkbox id="extra.enabled" label="追加欄を有効にする" checked="false" 
-            oncommand="document.getElementById('sendfrom.extra').hidden = !this.checked;window.sizeToContent();"
-  /><groupbox>
+          <checkbox id="extra.enabled" label="社名や電話番号を表示するために、追加欄を有効にする。" checked="false" 
+            oncommand="toggleExtra(!this.checked);"/>  
+      <groupbox>
           <caption label="宛先" />
           <tabbox style="color:red;">
             <tabs class="printha_selectable">
@@ -35,8 +36,8 @@
             <tabpanels>
               <tabpanel orient="vertical">
                 <description>宛先の情報を入力して下さい。姓名欄には敬称まで記入して下さい。</description>
-                <groupbox>
-                  <caption />
+                <hbox>
+                <vbox flex="1">
                   <vbox flex="1">
                     <hbox>
                       <label value="姓名" control="sendto.name" />
@@ -51,7 +52,38 @@
                     <label value="住所" control="sendfrom.address" />
                     <textbox id="sendto.address" multiline="true" flex="1" />
                   </hbox>
-                </groupbox>
+                </vbox>
+            <tabbox id="sendto.extra" hidden="true">
+            <tabs>
+             <tab label="1"/>
+             <tab label="2"/>
+             <tab label="3"/>
+             <tab label="4"/>
+             <tab label="5"/>
+             <tab label="6"/>
+            </tabs>
+            <tabpanels>
+            <tabpanel>
+              <textbox id="sendto.extra[0]" multiline="true" flex="1" />
+            </tabpanel>
+            <tabpanel>
+              <textbox id="sendto.extra[1]" multiline="true" flex="1" />
+            </tabpanel>
+            <tabpanel>
+              <textbox id="sendto.extra[2]" multiline="true" flex="1" />
+            </tabpanel>
+            <tabpanel>
+              <textbox id="sendto.extra[3]" multiline="true" flex="1" />
+            </tabpanel>
+            <tabpanel>
+              <textbox id="sendto.extra[4]" multiline="true" flex="1" />
+            </tabpanel>
+            <tabpanel>
+              <textbox id="sendto.extra[5]" multiline="true" flex="1" />
+            </tabpanel>
+            </tabpanels>
+            </tabbox>
+            </hbox>
               </tabpanel>
               <tabpanel orient="vertical" id="csv-box">
                 <description>宛先の姓・名・郵便番号・住所が記載されているCSVファイルを選択して下さい。</description>
@@ -59,15 +91,16 @@
                   <textbox id="csv-path" readonly="true" flex="1" />
                   <button label="ファイルの選択..." oncommand="selectCSV();" />
                 </hbox>
-                <groupbox orient="vertical">
+                <groupbox orient="horizontal">
                   <caption label="先頭の情報" />
+                  <vbox flex="1">
                   <hbox flex="1">
                     <label value="姓" control="csv.sendto.fname" />
                     <textbox id="csv.sendto.fname" flex="1" readonly="true" />
                     <label value="名" control="sendto.sname" />
                     <textbox id="csv.sendto.sname" flex="1" readonly="true" />
                     <label value="敬称" control="csv.sendto.honorifics" />
-                    <textbox id="csv.sendto.honorifics" value="様" />
+                    <textbox id="csv.sendto.honorifics" flex="1" value="様" />
                   </hbox>
                   <hbox>
                     <label value="郵便番号" control="sendto.zipcode" />
@@ -78,6 +111,37 @@
                     <textbox id="csv.sendto.address"
                              multiline="true" flex="1" readonly="true" />
                   </hbox>
+                 </vbox>
+            <tabbox id="csv.sendto.extra" hidden="true">
+            <tabs>
+             <tab label="1"/>
+             <tab label="2"/>
+             <tab label="3"/>
+             <tab label="4"/>
+             <tab label="5"/>
+             <tab label="6"/>
+            </tabs>
+            <tabpanels>
+            <tabpanel>
+              <textbox id="csv.sendto.extra[0]" multiline="true" readonly="true" flex="1" />
+            </tabpanel>
+            <tabpanel>
+              <textbox id="csv.sendto.extra[1]" multiline="true" readonly="true" flex="1" />
+            </tabpanel>
+            <tabpanel>
+              <textbox id="csv.sendto.extra[2]" multiline="true" readonly="true" flex="1" />
+            </tabpanel>
+            <tabpanel>
+              <textbox id="csv.sendto.extra[3]" multiline="true" readonly="true" flex="1" />
+            </tabpanel>
+            <tabpanel>
+              <textbox id="csv.sendto.extra[4]" multiline="true" readonly="true" flex="1" />
+            </tabpanel>
+            <tabpanel>
+              <textbox id="csv.sendto.extra[5]" multiline="true" readonly="true" flex="1" />
+            </tabpanel>
+            </tabpanels>
+            </tabbox>
                 </groupbox>
               </tabpanel>
             </tabpanels>
@@ -225,222 +289,371 @@
             <tabpanel orient="vertical">
               <vbox>
                 <description>「お年玉付き年賀状」以外で差出人の郵便番号を印刷するための位置補正の値(単位はミリメートル)で、一般的な官製はがきの適正値は(0.0, 15.5)です。</description>
-                <hbox id="sendfrom_zipframe_offset">
+                <hbox>
                   <button label="「お年玉付き」に合わせる"
-  oncommand="this.parentNode.childNodes[3].value=0;this.parentNode.childNodes[4].value=0;"
+                          oncommand="this.nextSibling.nextSibling.nextSibling.value='0 0';"
                           />
                   <button label="普通のはがきに合わせる"
-  oncommand="this.parentNode.childNodes[3].value=0;this.parentNode.childNodes[4].value=15.5;"
+                          oncommand="this.nextSibling.nextSibling.value='0 15.5';"
                           />
                   <spacer flex="1" />
-                  <textbox type="number" decimalplaces="1"
-                           min="-6" max="94" size="5"
-                           id="sendfrom_zipframe_offset.x"
-                           value="0.0"/>
-                  <textbox type="number" decimalplaces="1"
-                           min="-122" max="26" size="5"
-                           id="sendfrom_zipframe_offset.y"
-                           value="0.0"/>
+                  <pointbox id="sendfrom_zipframe_offset" value="0 0"/>
                 </hbox>
               </vbox>
 <tabbox>
   <tabs>
     <tab label="宛先の名前"/>
     <tab label="宛先の住所"/>
+    <tab label="宛先の追加欄" id="style.sendto.extra" hidden="true"/>
     <tab label="差出人の名前"/>
     <tab label="差出人の住所"/>
+    <tab label="差出人の追加欄" id="style.sendfrom.extra" hidden="true"/>
   </tabs>
   <tabpanels>
     <tabpanel orient="vertical">
                 <description>各数字は、左上を原点とした場合、長方形の左辺、上辺、右辺、下辺の座標を指しています。あるいは、左上の点と右下の点を並べたものです。単位はポイント(Pt)で、1Ptは約0.353mmです。</description>
-                <hbox id="sendto.name.rect">
-                  <spacer flex="1" />
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="283.464567" size="10"
-                           value="117.732283"/>
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="419.527559" size="10"
-                           value="80.000000"/>
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="283.464567" size="10"
-                           value="165.732283"/>
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="419.527559" size="10"
-                           value="360.000000"/>
-                </hbox>
-<hbox>
-  <spacer flex="1" />
-  <vbox>
-    <spacer flex="1" />
-    <button label="⇦" oncommand="goLeft(this)"/>
-    <spacer flex="1" />
-  </vbox>
-  <vbox>
-    <button label="⇧" oncommand="goUp(this)"/>
-    <button label="⇩" oncommand="goDown(this)"/>
-  </vbox>
-  <vbox>
-    <spacer flex="1" />
-    <button label="⇨" oncommand="goRight(this)"/>
-    <spacer flex="1" />
-  </vbox>
-  <vbox>
-    <button label="↔+" oncommand="hWider(this)"/>
-    <spacer flex="1" />
-    <button label="↔-" oncommand="hNarrower(this)"/>
-  </vbox>
-  <vbox>
-    <button label="↕+" oncommand="vWider(this)"/>
-    <spacer flex="1" />
-    <button label="↕-" oncommand="vNarrower(this)"/>
-  </vbox>
-</hbox>
-
+              <rectbox id="sendto.name.rect" value="117.732283 80 165.732283 360"/>
               <checkbox id="sendto.name.stretch" label="余白を文字間で均等に割り付ける。" checked="true" />
               <checkbox id="sendto.name.bottom" label="2行目以降を1行目の下限で揃える。" checked="false" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendto.name.whitespace" type="number"
+                         min="0" max="2" size="3" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+             </hbox>
     </tabpanel>
     <tabpanel orient="vertical">
                 <description>各数字は、左上を原点とした場合、長方形の左辺、上辺、右辺、下辺の座標を指しています。あるいは、左上の点と右下の点を並べたものです。単位はポイント(Pt)で、1Ptは約0.353mmです。</description>
-                <hbox id="sendto.addr.rect">
-                  <spacer flex="1" />
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="283.464567" size="10"
-                           value="219.464567"/>
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="419.527559" size="10"
-                           value="80.000000"/>
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="283.464567" size="10"
-                           value="283.464567"/>
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="419.527559" size="10"
-                           value="330.000000"/>
-                </hbox>
-<hbox>
-  <spacer flex="1" />
-  <vbox>
-    <spacer flex="1" />
-    <button label="⇦" oncommand="goLeft(this)"/>
-    <spacer flex="1" />
-  </vbox>
-  <vbox>
-    <button label="⇧" oncommand="goUp(this)"/>
-    <button label="⇩" oncommand="goDown(this)"/>
-  </vbox>
-  <vbox>
-    <spacer flex="1" />
-    <button label="⇨" oncommand="goRight(this)"/>
-    <spacer flex="1" />
-  </vbox>
-  <vbox>
-    <button label="↔+" oncommand="hWider(this)"/>
-    <spacer flex="1" />
-    <button label="↔-" oncommand="hNarrower(this)"/>
-  </vbox>
-  <vbox>
-    <button label="↕+" oncommand="vWider(this)"/>
-    <spacer flex="1" />
-    <button label="↕-" oncommand="vNarrower(this)"/>
-  </vbox>
-</hbox>
+              <rectbox id="sendto.addr.rect" value="219.464567 80 283.464567 330"/>
               <checkbox id="sendto.addr.stretch" label="余白を文字間で均等に割り付ける。" checked="false" />
               <checkbox id="sendto.addr.bottom" label="2行目以降を1行目の下限で揃える。" checked="true" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendto.addr.whitespace" type="number"
+                         min="0" max="2" size="3" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+             </hbox>
+    </tabpanel>
+    <tabpanel>
+
+
+            <tabbox>
+            <tabs>
+             <tab label="1"/>
+             <tab label="2"/>
+             <tab label="3"/>
+             <tab label="4"/>
+             <tab label="5"/>
+             <tab label="6"/>
+            </tabs>
+            <tabpanels>
+            <tabpanel orient="vertical">
+              <rectbox id="sendto.extra[0].rect" value="0 0 0 0"/>
+              <checkbox id="sendto.extra[0].stretch" label="余白を文字間で均等に割り付ける。" checked="false" />
+              <checkbox id="sendto.extra[0].bottom" label="2行目以降を1行目の下限で揃える。" checked="false" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendto.extra[0].whitespace" type="number"
+                         min="0" max="2" size="4" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+              </hbox>
+              <hbox>
+                <label value="フォントサイズ" />
+                <spacer flex="1" />
+                <textbox id="sendto.extra[0].fontsize" type="number"
+                         min="1" max="128" size="4" value="20" 
+                         decimalplaces="1"
+                         />
+              </hbox>
+            </tabpanel>
+            <tabpanel orient="vertical">
+              <rectbox id="sendto.extra[1].rect" value="0 0 0 0"/>
+              <checkbox id="sendto.extra[1].stretch" label="余白を文字間で均等に割り付ける。" checked="false" />
+              <checkbox id="sendto.extra[1].bottom" label="2行目以降を1行目の下限で揃える。" checked="false" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendto.extra[1].whitespace" type="number"
+                         min="0" max="2" size="4" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+              </hbox>
+              <hbox>
+                <label value="フォントサイズ" />
+                <spacer flex="1" />
+                <textbox id="sendto.extra[1].fontsize" type="number"
+                         min="1" max="128" size="4" value="20" 
+                         decimalplaces="1"
+                         />
+              </hbox>
+            </tabpanel>
+            <tabpanel orient="vertical">
+              <rectbox id="sendto.extra[2].rect" value="0 0 0 0"/>
+              <checkbox id="sendto.extra[2].stretch" label="余白を文字間で均等に割り付ける。" checked="false" />
+              <checkbox id="sendto.extra[2].bottom" label="2行目以降を1行目の下限で揃える。" checked="false" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendto.extra[2].whitespace" type="number"
+                         min="0" max="2" size="4" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+              </hbox>
+              <hbox>
+                <label value="フォントサイズ" />
+                <spacer flex="1" />
+                <textbox id="sendto.extra[2].fontsize" type="number"
+                         min="1" max="128" size="4" value="20" 
+                         decimalplaces="1"
+                         />
+              </hbox>
+            </tabpanel>
+            <tabpanel orient="vertical">
+              <rectbox id="sendto.extra[3].rect" value="0 0 0 0"/>
+              <checkbox id="sendto.extra[3].stretch" label="余白を文字間で均等に割り付ける。" checked="false" />
+              <checkbox id="sendto.extra[3].bottom" label="2行目以降を1行目の下限で揃える。" checked="false" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendto.extra[3].whitespace" type="number"
+                         min="0" max="2" size="4" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+              </hbox>
+              <hbox>
+                <label value="フォントサイズ" />
+                <spacer flex="1" />
+                <textbox id="sendto.extra[3].fontsize" type="number"
+                         min="1" max="128" size="4" value="20" 
+                         decimalplaces="1"
+                         />
+              </hbox>
+            </tabpanel>
+            <tabpanel orient="vertical">
+              <rectbox id="sendto.extra[4].rect" value="0 0 0 0"/>
+              <checkbox id="sendto.extra[4].stretch" label="余白を文字間で均等に割り付ける。" checked="false" />
+              <checkbox id="sendto.extra[4].bottom" label="2行目以降を1行目の下限で揃える。" checked="false" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendto.extra[4].whitespace" type="number"
+                         min="0" max="2" size="4" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+              </hbox>
+              <hbox>
+                <label value="フォントサイズ" />
+                <spacer flex="1" />
+                <textbox id="sendto.extra[4].fontsize" type="number"
+                         min="1" max="128" size="4" value="20" 
+                         decimalplaces="1"
+                         />
+              </hbox>
+            </tabpanel>
+            <tabpanel orient="vertical">
+              <rectbox id="sendto.extra[5].rect" value="0 0 0 0"/>
+              <checkbox id="sendto.extra[5].stretch" label="余白を文字間で均等に割り付ける。" checked="false" />
+              <checkbox id="sendto.extra[5].bottom" label="2行目以降を1行目の下限で揃える。" checked="false" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendto.extra[5].whitespace" type="number"
+                         min="0" max="2" size="4" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+              </hbox>
+              <hbox>
+                <label value="フォントサイズ" />
+                <spacer flex="1" />
+                <textbox id="sendto.extra[5].fontsize" type="number"
+                         min="1" max="128" size="4" value="20" 
+                         decimalplaces="1"
+                         />
+              </hbox>
+            </tabpanel>
+            </tabpanels>
+            </tabbox>
+
     </tabpanel>
     <tabpanel orient="vertical">
                 <description>各数字は、左上を原点とした場合、長方形の左辺、上辺、右辺、下辺の座標を指しています。あるいは、左上の点と右下の点を並べたものです。単位はポイント(Pt)で、1Ptは約0.353mmです。</description>
-                <hbox id="sendfrom.name.rect">
-                  <spacer flex="1" />
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="283.464567" size="10"
-                           value="0.000000"/>
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="419.527559" size="10"
-                           value="200.000000"/>
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="283.464567" size="10"
-                           value="32.000000 "/>
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="419.527559" size="10"
-                           value="340.000000"/>
-                </hbox>
-<hbox>
-  <spacer flex="1" />
-  <vbox>
-    <spacer flex="1" />
-    <button label="⇦" oncommand="goLeft(this)"/>
-    <spacer flex="1" />
-  </vbox>
-  <vbox>
-    <button label="⇧" oncommand="goUp(this)"/>
-    <button label="⇩" oncommand="goDown(this)"/>
-  </vbox>
-  <vbox>
-    <spacer flex="1" />
-    <button label="⇨" oncommand="goRight(this)"/>
-    <spacer flex="1" />
-  </vbox>
-  <vbox>
-    <button label="↔+" oncommand="hWider(this)"/>
-    <spacer flex="1" />
-    <button label="↔-" oncommand="hNarrower(this)"/>
-  </vbox>
-  <vbox>
-    <button label="↕+" oncommand="vWider(this)"/>
-    <spacer flex="1" />
-    <button label="↕-" oncommand="vNarrower(this)"/>
-  </vbox>
-</hbox>
-
+              <rectbox id="sendfrom.name.rect" value="0 200 32 340"/>
               <checkbox id="sendfrom.name.stretch" label="余白を文字間で均等に割り付ける。" checked="true" />
               <checkbox id="sendfrom.name.bottom" label="2行目以降を1行目の下限で揃える。" checked="false" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendfrom.name.whitespace" type="number"
+                         min="0" max="2" size="3" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+             </hbox>
     </tabpanel>
     <tabpanel orient="vertical">
                 <description>各数字は、左上を原点とした場合、長方形の左辺、上辺、右辺、下辺の座標を指しています。あるいは、左上の点と右下の点を並べたものです。単位はポイント(Pt)で、1Ptは約0.353mmです。</description>
-                <hbox id="sendfrom.addr.rect">
-                  <spacer flex="1" />
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="283.464567" size="10"
-                           value="32.000000"/>
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="419.527559" size="10"
-                           value="160.000000"/>
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="283.464567" size="10"
-                           value="80.000000"/>
-                  <textbox type="number" decimalplaces="6"
-                           min="0" max="419.527559" size="10"
-                           value="340.000000"/>
-                </hbox>
-<hbox>
-    <spacer flex="1" />
-  <vbox>
-    <spacer flex="1" />
-    <button label="⇦" oncommand="goLeft(this)"/>
-    <spacer flex="1" />
-  </vbox>
-  <vbox>
-    <button label="⇧" oncommand="goUp(this)"/>
-    <button label="⇩" oncommand="goDown(this)"/>
-  </vbox>
-  <vbox>
-    <spacer flex="1" />
-    <button label="⇨" oncommand="goRight(this)"/>
-    <spacer flex="1" />
-  </vbox>
-  <vbox>
-    <button label="↔+" oncommand="hWider(this)"/>
-    <spacer flex="1" />
-    <button label="↔-" oncommand="hNarrower(this)"/>
-  </vbox>
-  <vbox>
-    <button label="↕+" oncommand="vWider(this)"/>
-    <spacer flex="1" />
-    <button label="↕-" oncommand="vNarrower(this)"/>
-  </vbox>
-</hbox>
+              <rectbox id="sendfrom.addr.rect" value="32 160 80 340"/>
 
               <checkbox id="sendfrom.addr.stretch" label="余白を文字間で均等に割り付ける。" checked="false" />
               <checkbox id="sendfrom.addr.bottom" label="2行目以降を1行目の下限で揃える。" checked="true" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendfrom.addr.whitespace" type="number"
+                         min="0" max="2" size="3" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+             </hbox>
+    </tabpanel>
+    <tabpanel>
+
+            <tabbox>
+            <tabs>
+             <tab label="1"/>
+             <tab label="2"/>
+             <tab label="3"/>
+             <tab label="4"/>
+             <tab label="5"/>
+             <tab label="6"/>
+            </tabs>
+            <tabpanels>
+            <tabpanel orient="vertical">
+              <rectbox id="sendfrom.extra[0].rect" value="0 0 0 0"/>
+              <checkbox id="sendfrom.extra[0].stretch" label="余白を文字間で均等に割り付ける。" checked="false" />
+              <checkbox id="sendfrom.extra[0].bottom" label="2行目以降を1行目の下限で揃える。" checked="false" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendfrom.extra[0].whitespace" type="number"
+                         min="0" max="2" size="4" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+              </hbox>
+              <hbox>
+                <label value="フォントサイズ" />
+                <spacer flex="1" />
+                <textbox id="sendfrom.extra[0].fontsize" type="number"
+                         min="1" max="128" size="4" value="20" 
+                         decimalplaces="1"
+                         />
+              </hbox>
+            </tabpanel>
+            <tabpanel orient="vertical">
+              <rectbox id="sendfrom.extra[1].rect" value="0 0 0 0"/>
+              <checkbox id="sendfrom.extra[1].stretch" label="余白を文字間で均等に割り付ける。" checked="false" />
+              <checkbox id="sendfrom.extra[1].bottom" label="2行目以降を1行目の下限で揃える。" checked="false" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendfrom.extra[1].whitespace" type="number"
+                         min="0" max="2" size="4" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+              </hbox>
+              <hbox>
+                <label value="フォントサイズ" />
+                <spacer flex="1" />
+                <textbox id="sendfrom.extra[1].fontsize" type="number"
+                         min="1" max="128" size="4" value="20" 
+                         decimalplaces="1"
+                         />
+              </hbox>
+            </tabpanel>
+            <tabpanel orient="vertical">
+              <rectbox id="sendfrom.extra[2].rect" value="0 0 0 0"/>
+              <checkbox id="sendfrom.extra[2].stretch" label="余白を文字間で均等に割り付ける。" checked="false" />
+              <checkbox id="sendfrom.extra[2].bottom" label="2行目以降を1行目の下限で揃える。" checked="false" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendfrom.extra[2].whitespace" type="number"
+                         min="0" max="2" size="4" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+              </hbox>
+              <hbox>
+                <label value="フォントサイズ" />
+                <spacer flex="1" />
+                <textbox id="sendfrom.extra[2].fontsize" type="number"
+                         min="1" max="128" size="4" value="20" 
+                         decimalplaces="1"
+                         />
+              </hbox>
+            </tabpanel>
+            <tabpanel orient="vertical">
+              <rectbox id="sendfrom.extra[3].rect" value="0 0 0 0"/>
+              <checkbox id="sendfrom.extra[3].stretch" label="余白を文字間で均等に割り付ける。" checked="false" />
+              <checkbox id="sendfrom.extra[3].bottom" label="2行目以降を1行目の下限で揃える。" checked="false" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendfrom.extra[3].whitespace" type="number"
+                         min="0" max="2" size="4" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+              </hbox>
+              <hbox>
+                <label value="フォントサイズ" />
+                <spacer flex="1" />
+                <textbox id="sendfrom.extra[3].fontsize" type="number"
+                         min="1" max="128" size="4" value="20" 
+                         decimalplaces="1"
+                         />
+              </hbox>
+            </tabpanel>
+            <tabpanel orient="vertical">
+              <rectbox id="sendfrom.extra[4].rect" value="0 0 0 0"/>
+              <checkbox id="sendfrom.extra[4].stretch" label="余白を文字間で均等に割り付ける。" checked="false" />
+              <checkbox id="sendfrom.extra[4].bottom" label="2行目以降を1行目の下限で揃える。" checked="false" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendfrom.extra[4].whitespace" type="number"
+                         min="0" max="2" size="4" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+              </hbox>
+              <hbox>
+                <label value="フォントサイズ" />
+                <spacer flex="1" />
+                <textbox id="sendfrom.extra[4].fontsize" type="number"
+                         min="1" max="128" size="4" value="20" 
+                         decimalplaces="1"
+                         />
+              </hbox>
+            </tabpanel>
+            <tabpanel orient="vertical">
+              <rectbox id="sendfrom.extra[5].rect" value="0 0 0 0"/>
+              <checkbox id="sendfrom.extra[5].stretch" label="余白を文字間で均等に割り付ける。" checked="false" />
+              <checkbox id="sendfrom.extra[5].bottom" label="2行目以降を1行目の下限で揃える。" checked="false" />
+              <hbox>
+                <label value="全角を1.0とした場合の半角スペースの幅。" />
+                <spacer flex="1" />
+                <textbox id="sendfrom.extra[5].whitespace" type="number"
+                         min="0" max="2" size="4" value="0.4" increment="0.1"
+                         decimalplaces="1"
+                         />
+              </hbox>
+              <hbox>
+                <label value="フォントサイズ" />
+                <spacer flex="1" />
+                <textbox id="sendfrom.extra[5].fontsize" type="number"
+                         min="1" max="128" size="4" value="20" 
+                         decimalplaces="1"
+                         />
+              </hbox>
+            </tabpanel>
+            </tabpanels>
+            </tabbox>
+
+
+
+
     </tabpanel>
   </tabpanels>
 </tabbox>
@@ -454,6 +667,11 @@
             </tabpanel>
           </tabpanels>
         </tabbox>
+      <hbox>
+      <spacer flex="1"/>
+      <button label="設定を保存する..." oncommand="saveConfig()" />
+      <button label="設定を読み込む..." oncommand="loadConfig()" />
+      </hbox>
       </tabpanel>
       <tabpanel orient="vertical">
         <browser id="content" name="content" src="about:blank" flex="1" disablehistory="true" style="min-height : 149px; min-width : 101px;" onclick="event.preventDefault();" />

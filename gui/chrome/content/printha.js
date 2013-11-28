@@ -11,8 +11,17 @@ var gPrinthaSettings = {
     return document.getElementById("zipfont-list").selectedItem.value;
   },
 
+  set "font" (aValue) {
+    document.getElementById("font-list").value = aValue;
+  },
+
+  set "zipfont" (aValue) {
+    document.getElementById("zipfont-list").value = aValue;
+  },
+
   set addressData(aData) {
     this._addressData = aData;
+    var i;
     if (this._addressData.length > 0 && this._addressData[0].length > 3) {
       document.getElementById("csv.sendto.fname").value = this._addressData[0][0];
       document.getElementById("csv.sendto.sname").value = this._addressData[0][1];
@@ -28,6 +37,12 @@ var gPrinthaSettings = {
       document.getElementById("csv.sendto.sname").value = "";
       document.getElementById("csv.sendto.zipcode").value = "";
       document.getElementById("csv.sendto.address").value = "";
+    }
+
+    for (i = 0; i < 6; i++) {
+      document.getElementById("csv.sendto.extra[" + i + "]").value = 
+       ((i + 5) < this._addressData[0].length)?
+         this._addressData[0][i + 5] : "";
     }
   },
 
@@ -75,11 +90,9 @@ var gPrinthaSettings = {
     document.getElementById("sendfrom.zipcode").value = data[1];
     document.getElementById("sendfrom.address").value = data[2];
 
-    var length = (data.length > (3 + 6))? (3 + 6) : data.length;
-
-    for (var i = 3; i < length; i++) {
-      document.getElementById("sendfrom.extra[" + (i - 3).toString() + "]")
-              .value = data[i];
+    for (var i = 0; i < 6; i++) {
+      document.getElementById("sendfrom.extra[" + (i).toString() + "]")
+              .value = ((i + 3) < data.length)? data[i + 3] : "";
     }
   },
 
@@ -100,8 +113,14 @@ var gPrinthaSettings = {
     var data = aLine[0] + " " + aLine[1] + aHonorifics + ";"
                         + aLine[2] + ";" + aLine[3];
     if (aLine.length > 4 && aLine[4]) {
-      data += "\n" + aLine[4] + ";";
+      data += "\n" + aLine[4];
     }
+
+    var length = ((5 + 6) < aLine.length )? (5 + 6) : aLine.length;
+    for (var i = 5; i < length; i++) {
+      data += ";" + aLine[i];
+    }
+
     return data;
   },
 
@@ -119,11 +138,57 @@ var gPrinthaSettings = {
       var key = this.configCheckedKeys[i]; 
       data += key + " " + document.getElementById(key).checked + "\n";
     }
-    for (var i in this.configValuesKeys) {
-      var key = this.configValuesKeys[i]; 
-      data += key + this.valuesById(key) + "\n";
-    }
     return data;
+  },
+
+  set configData(aValue) {
+    var lines = aValue.split("\n");
+    for (var j = 0; j < lines.length; j++) {
+      var line = lines[j];
+      if (!line || line.charAt(0) == "#") {
+        continue;
+      }
+      const reg = /^([a-zA-Z0-9\.\[\]]+)/;
+      if (reg.test(line)) {
+        var key = RegExp.$1;
+        var value = line.replace(reg, "").trim();
+        var found = false;
+        if (key == "font") {
+          this["font"] = value;
+          continue;
+        }
+
+        if (key == "zipfont") {
+          this["zipfont"] = value;
+          continue;
+        }
+
+        for (var i in this.configValueKeys) {
+          if (key == this.configValueKeys[i]) {
+            document.getElementById(key).value = value;
+            found = true;
+            break;
+          }
+        }
+
+        if (found) {
+          continue;
+        }
+
+        for (var i in this.configCheckedKeys) {
+          if (key == this.configCheckedKeys[i]) {
+            if (value == "true") {
+              document.getElementById(key).checked = true;
+              break;
+            }
+            else if (value == "false") {
+              document.getElementById(key).checked = false;
+              break;
+            }
+          }
+        }
+      }
+    }
   },
 
   get hono() {
@@ -138,9 +203,79 @@ var gPrinthaSettings = {
     "sendto.name.fontsize",
     "sendto.addr.fontsize",
     "sendfrom.addr.fontsize",
-    "sendfrom.name.fontsize"
+    "sendfrom.name.fontsize",
+    "sendfrom_zipframe_offset",
+    "sendfrom.addr.whitespace",
+    "sendfrom.name.whitespace",
+    "sendto.addr.whitespace",
+    "sendto.name.whitespace",
+    "sendto.name.rect",
+    "sendto.addr.rect",
+    "sendfrom.name.rect",
+    "sendfrom.addr.rect",
+    "sendto.extra[0].rect",
+    "sendto.extra[0].whitespace",
+    "sendto.extra[0].fontsize",
+    "sendto.extra[1].rect",
+    "sendto.extra[1].whitespace",
+    "sendto.extra[1].fontsize",
+    "sendto.extra[2].rect",
+    "sendto.extra[2].whitespace",
+    "sendto.extra[2].fontsize",
+    "sendto.extra[3].rect",
+    "sendto.extra[3].whitespace",
+    "sendto.extra[3].fontsize",
+    "sendto.extra[4].rect",
+    "sendto.extra[4].whitespace",
+    "sendto.extra[4].fontsize",
+    "sendto.extra[5].rect",
+    "sendto.extra[5].whitespace",
+    "sendto.extra[5].fontsize",
+    "sendfrom.extra[0].rect",
+    "sendfrom.extra[0].whitespace",
+    "sendfrom.extra[0].fontsize",
+    "sendfrom.extra[1].rect",
+    "sendfrom.extra[1].whitespace",
+    "sendfrom.extra[1].fontsize",
+    "sendfrom.extra[2].rect",
+    "sendfrom.extra[2].whitespace",
+    "sendfrom.extra[2].fontsize",
+    "sendfrom.extra[3].rect",
+    "sendfrom.extra[3].whitespace",
+    "sendfrom.extra[3].fontsize",
+    "sendfrom.extra[4].rect",
+    "sendfrom.extra[4].whitespace",
+    "sendfrom.extra[4].fontsize",
+    "sendfrom.extra[5].rect",
+    "sendfrom.extra[5].whitespace",
+    "sendfrom.extra[5].fontsize"
   ],
   configCheckedKeys: [
+    "sendto.extra[0].stretch",
+    "sendto.extra[0].bottom",
+    "sendto.extra[1].stretch",
+    "sendto.extra[1].bottom",
+    "sendto.extra[2].stretch",
+    "sendto.extra[2].bottom",
+    "sendto.extra[3].stretch",
+    "sendto.extra[3].bottom",
+    "sendto.extra[4].stretch",
+    "sendto.extra[4].bottom",
+    "sendto.extra[5].stretch",
+    "sendto.extra[5].bottom",
+
+    "sendfrom.extra[0].stretch",
+    "sendfrom.extra[0].bottom",
+    "sendfrom.extra[1].stretch",
+    "sendfrom.extra[1].bottom",
+    "sendfrom.extra[2].stretch",
+    "sendfrom.extra[2].bottom",
+    "sendfrom.extra[3].stretch",
+    "sendfrom.extra[3].bottom",
+    "sendfrom.extra[4].stretch",
+    "sendfrom.extra[4].bottom",
+    "sendfrom.extra[5].stretch",
+    "sendfrom.extra[5].bottom",
     "drawnenga",
     "sendto.drawzipframe",
     "sendfrom.drawzipframe",
@@ -154,11 +289,6 @@ var gPrinthaSettings = {
     "sendfrom.addr.bottom"
   ],
   configValuesKeys: [
-    "sendfrom_zipframe_offset",
-    "sendto.addr.rect",
-    "sendto.name.rect",
-    "sendfrom.addr.rect",
-    "sendfrom.name.rect"
   ],
   valuesById: function(aId) {
     var values = "";
@@ -180,6 +310,23 @@ var gPrinthaSettings = {
   binpath: "",
   _addressData: [["","","",""]]
 };
+
+function toggleExtra (aHidden) {
+  document.getElementById('sendfrom.extra').hidden = aHidden;
+  document.getElementById('sendto.extra').hidden = aHidden;
+  document.getElementById('csv.sendto.extra').hidden = aHidden;
+
+  var sendfromStyle = document.getElementById('style.sendfrom.extra');
+  var sendtoStyle = document.getElementById('style.sendto.extra');
+  sendfromStyle.hidden = aHidden;
+  sendtoStyle.hidden = aHidden;
+
+  if (aHidden && (sendfromStyle.selected || styleSendto.selcted)) {
+    sendfromStyle.parentNode.selectedIndex = 0;
+  }
+
+  window.sizeToContent();
+}
 
 function selectCSV() {
   var fp = Components.classes["@mozilla.org/filepicker;1"]
@@ -218,6 +365,67 @@ function selectCSV() {
   NetUtil.asyncFetch(fp.file, callback);
 }
 
+function loadConfig() {
+  var fp = Components.classes["@mozilla.org/filepicker;1"]
+                     .createInstance(Components.interfaces.nsIFilePicker);
+  fp.init(window, "設定ファイルの選択",
+          Components.interfaces.nsIFilePicker.modeOpen);
+  fp.appendFilters(Components.interfaces.nsIFilePicker.filterText);
+
+  var rv = fp.show();
+  if (rv != Components.interfaces.nsIFilePicker.returnOK &&
+      rv != Components.interfaces.nsIFilePicker.returnReplace) {
+    return;
+  }
+
+  function callback(aInputStream, aStatus) {
+    if (!Components.isSuccessCode(aStatus)) {
+      return;
+    }
+
+    const rc = Components.interfaces.nsIConverterInputStream
+                                    .DEFAULT_REPLACEMENT_CHARACTER;
+    const kOption = {
+      charset: "utf-8",
+      eplacement: Components.interfaces.nsIConverterInputStream
+                            .DEFAULT_REPLACEMENT_CHARACTER
+    };
+    gPrinthaSettings.configData =
+      NetUtil.readInputStreamToString(aInputStream, aInputStream.available(),
+                                      kOption);
+  }
+
+  NetUtil.asyncFetch(fp.file, callback);
+}
+
+function saveTextFile(aData, aFileLeaf) {
+  var fp = Components.classes["@mozilla.org/filepicker;1"]
+                     .createInstance(Components.interfaces.nsIFilePicker);
+  fp.init(window, "保存先の選択",
+          Components.interfaces.nsIFilePicker.modeSave);
+  fp.appendFilters(Components.interfaces.nsIFilePicker.filterText);
+  fp.defaultString = aFileLeaf;
+  var rv = fp.show();
+  if (rv != Components.interfaces.nsIFilePicker.returnOK &&
+      rv != Components.interfaces.nsIFilePicker.returnReplace) {
+    return;
+  }
+
+  var suc = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+                      .createInstance(Components.interfaces
+                                                .nsIScriptableUnicodeConverter);
+  suc.charset = "utf-8";
+  var is = suc.convertToInputStream(aData);
+  var os = FileUtils.openSafeFileOutputStream(fp.file)
+
+  NetUtil.asyncCopy(is, os, function (aResult) {});
+
+}
+
+function saveConfig() {
+  saveTextFile(gPrinthaSettings.configData, "printha.config.txt");
+}
+
 function loadSender() {
   var fp = Components.classes["@mozilla.org/filepicker;1"]
                      .createInstance(Components.interfaces.nsIFilePicker);
@@ -234,26 +442,7 @@ function loadSender() {
 }
 
 function saveSender() {
-  var fp = Components.classes["@mozilla.org/filepicker;1"]
-                     .createInstance(Components.interfaces.nsIFilePicker);
-  fp.init(window, "保存先の選択",
-          Components.interfaces.nsIFilePicker.modeSave);
-  fp.appendFilters(Components.interfaces.nsIFilePicker.filterText);
-  fp.defaultString = "sendfrom.txt"
-  var rv = fp.show();
-  if (rv != Components.interfaces.nsIFilePicker.returnOK &&
-      rv != Components.interfaces.nsIFilePicker.returnReplace) {
-    return;
-  }
-
-  var suc = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-                      .createInstance(Components.interfaces
-                                                .nsIScriptableUnicodeConverter);
-  suc.charset = "utf-8";
-  var is = suc.convertToInputStream(gPrinthaSettings.sendfromData);
-  var os = FileUtils.openSafeFileOutputStream(fp.file)
-
-  NetUtil.asyncCopy(is, os, function (aResult) {});
+  saveTextFile(gPrinthaSettings.sendfromData, "sendfrom.txt");
 }
 
 function print(aIsPreview) {
@@ -312,7 +501,7 @@ function print2(aStatus) {
     NetUtil.asyncCopy(is, os, print3);
   }
   catch(e) {
-    alert(e);
+    alert(e + e.lineNumber);
   }
 }
 

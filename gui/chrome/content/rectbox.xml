@@ -1,0 +1,320 @@
+<?xml version="1.0"?>
+<bindings
+  xmlns="http://www.mozilla.org/xbl"
+  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:xbl="http://www.mozilla.org/xbl">
+  <binding id="rectbox">
+    <content pack="center">
+      <xul:vbox>
+<xul:hbox>
+                  <xul:textbox anonid="sx" type="number" decimalplaces="6"
+                           min="0" max="283.464567" size="10"
+                           onchange="this.parentNode.parentNode.parentNode.validate(this)"
+                           />
+                  <xul:textbox anonid="sy" type="number" decimalplaces="6"
+                           min="0" max="419.527559" size="10"
+                           onchange="this.parentNode.parentNode.parentNode.validate(this)"
+                           />
+                  <xul:textbox anonid="ex" type="number" decimalplaces="6"
+                           min="0" max="283.464567" size="10"
+                           onchange="this.parentNode.parentNode.parentNode.validate(this)"
+                           />
+                  <xul:textbox anonid="ey" type="number" decimalplaces="6"
+                           min="0" max="419.527559" size="10"
+                           onchange="this.parentNode.parentNode.parentNode.validate(this)"
+                           />
+</xul:hbox>
+
+<xul:hbox>
+  <xul:vbox>
+    <xul:spacer flex="1" />
+    <xul:textbox anonid="increment" type="number"
+                 min="1" max="99" size="2" value="1"/>
+    <xul:spacer flex="1" />
+  </xul:vbox>
+  <xul:vbox>
+    <xul:spacer flex="1" />
+    <xul:button label="⇦" oncommand="this.parentNode.parentNode.parentNode.parentNode.goLeft()"/>
+    <xul:spacer flex="1" />
+  </xul:vbox>
+  <xul:vbox>
+    <xul:button label="⇧" oncommand="this.parentNode.parentNode.parentNode.parentNode.goUp();"/>
+    <xul:button label="⇩" oncommand="this.parentNode.parentNode.parentNode.parentNode.goDown()"/>
+  </xul:vbox>
+  <xul:vbox>
+    <xul:spacer flex="1" />
+    <xul:button label="⇨" oncommand="this.parentNode.parentNode.parentNode.parentNode.goRight()"/>
+    <xul:spacer flex="1" />
+  </xul:vbox>
+  <xul:vbox>
+    <xul:button label="↔+" oncommand="this.parentNode.parentNode.parentNode.parentNode.hWider()"/>
+    <xul:spacer flex="1" />
+    <xul:button label="↔-" oncommand="this.parentNode.parentNode.parentNode.parentNode.hNarrower()"/>
+  </xul:vbox>
+  <xul:vbox>
+    <xul:button label="↕+" oncommand="this.parentNode.parentNode.parentNode.parentNode.vWider()"/>
+    <xul:spacer flex="1" />
+    <xul:button label="↕-" oncommand="this.parentNode.parentNode.parentNode.parentNode.vNarrower()"/>
+  </xul:vbox>
+</xul:hbox>
+
+
+      </xul:vbox>
+    </content>
+    <implementation>
+      <field name="mSX">null</field>
+      <field name="mSY">null</field>
+      <field name="mEX">null</field>
+      <field name="mEY">null</field>
+      <field name="mIncrement">null</field>
+      <field name="_isInit">false</field>
+      <property name="value">
+        <getter>
+          return this.sx.value + " " + this.sy.value + " " + this.ex.value + " " + this.ey.value;
+        </getter>
+        <setter>
+          <![CDATA[
+          this.setAttribute("value", val);
+          var array = val.toString().trim().split(" ");
+          while(array.length < 4) {
+            array.push(0);
+          }
+          this.sx.value = array[0];
+          this.sy.value = array[1];
+          this.ex.value = array[2];
+          this.ey.value = array[3];
+          return val;
+          ]]>
+        </setter>
+      </property>
+      <property name="sx">
+        <getter>
+          if (!this.mSX) {
+            this.mSX = document.getAnonymousElementByAttribute(this, "anonid", "sx");
+          }
+          return this.mSX;
+        </getter>
+      </property>
+      <property name="sy">
+        <getter>
+          if (!this.mSY) {
+            this.mSY = document.getAnonymousElementByAttribute(this, "anonid", "sy");
+          }
+          return this.mSY;
+        </getter>
+      </property>
+      <property name="ex">
+        <getter>
+          if (!this.mEX) {
+            this.mEX = document.getAnonymousElementByAttribute(this, "anonid", "ex");
+          }
+          return this.mEX;
+        </getter>
+      </property>
+      <property name="ey">
+        <getter>
+          if (!this.mEY) {
+            this.mEY = document.getAnonymousElementByAttribute(this, "anonid", "ey");
+          }
+          return this.mEY;
+        </getter>
+      </property>
+      <property name="ctrlInc">
+        <getter>
+          if (!this.mIncrement) {
+            this.mIncrement = document.getAnonymousElementByAttribute(this, "anonid", "increment");
+          }
+          return this.mIncrement.valueNumber;
+        </getter>
+      </property>
+      <constructor>
+        this.value = this.hasAttribute("value")? this.getAttribute("value") : "0 0 0 0";
+        this._isInit = true;
+      </constructor>
+      <method name="goUp">
+        <body>
+<![CDATA[{
+  var sy = this.sy.valueNumber - this.ctrlInc;
+  var ey = this.ey.valueNumber - this.ctrlInc;
+
+  if (Number(this.sy.min) <= sy && Number(this.ey.min) <= ey) {
+    this.sy.value = sy;
+    this.ey.value = ey;
+  }
+}]]>
+        </body>
+      </method>
+      <method name="goDown">
+        <body>
+<![CDATA[{
+  var sy = this.sy.valueNumber + this.ctrlInc;
+  var ey = this.ey.valueNumber + this.ctrlInc;
+
+  if (Number(this.sy.max) >= sy && Number(this.ey.max) >= ey) {
+    this.sy.value = sy;
+    this.ey.value = ey;
+  }
+}]]>
+        </body>
+      </method>
+      <method name="goLeft">
+        <body>
+<![CDATA[{
+  var sx = this.sx.valueNumber - this.ctrlInc;
+  var ex = this.ex.valueNumber - this.ctrlInc;
+
+  if (Number(this.sx.min) <= sx && Number(this.ex.min) <= ex) {
+    this.sx.value = sx;
+    this.ex.value = ex;
+  }
+}]]>
+        </body>
+      </method>
+      <method name="goRight">
+        <body>
+<![CDATA[{
+  var sx = this.sx.valueNumber + this.ctrlInc;
+  var ex = this.ex.valueNumber + this.ctrlInc;
+
+  if (Number(this.sx.max) >= sx && Number(this.ex.max) >= ex) {
+    this.sx.value = sx;
+    this.ex.value = ex;
+  }
+}]]>
+        </body>
+      </method>
+      <method name="hNarrower">
+        <body>
+<![CDATA[{
+  var sx = this.sx.valueNumber + this.ctrlInc;
+  var ex = this.ex.valueNumber - this.ctrlInc;
+
+  if (sx <= ex) {
+    this.sx.value = sx;
+    this.ex.value = ex;
+  }
+}]]>
+        </body>
+      </method>
+      <method name="vNarrower">
+        <body>
+<![CDATA[{
+  var sy = this.sy.valueNumber + this.ctrlInc;
+  var ey = this.ey.valueNumber - this.ctrlInc;
+
+  if (sy <= ey) {
+    this.sy.value = sy;
+    this.ey.value = ey;
+  }
+}]]>
+        </body>
+      </method>
+      <method name="vWider">
+        <body>
+<![CDATA[{
+  var sy = this.sy.valueNumber - this.ctrlInc;
+  var ey = this.ey.valueNumber + this.ctrlInc;
+
+  if (Number(this.sy.min) <= sy && Number(this.ey.max) >= ey) {
+    this.sy.value = sy;
+    this.ey.value = ey;
+  }
+}]]>
+        </body>
+      </method>
+      <method name="hWider">
+        <body>
+<![CDATA[{
+  var sx = this.sx.valueNumber - this.ctrlInc;
+  var ex = this.ex.valueNumber + this.ctrlInc;
+
+  if (Number(this.sx.min) <= sx && Number(this.ex.max) >= ex) {
+    this.sx.value = sx;
+    this.ex.value = ex;
+  }
+}]]>
+        </body>
+      </method>
+      <method name="validate">
+        <parameter name="aElement"/>
+        <body>
+<![CDATA[{
+  if (!this._isInit)
+    return;
+
+  switch (aElement.getAttribute("anonid")) {
+  case "sx":
+      if (aElement.valueNumber > this.ex.valueNumber)
+        aElement.valueNumber = this.ex.valueNumber;
+      break;
+  case "sy":
+      if (aElement.valueNumber > this.ey.valueNumber)
+        aElement.valueNumber = this.ey.valueNumber;
+      break;
+  case "ex":
+      if (aElement.valueNumber < this.sx.valueNumber)
+        aElement.valueNumber = this.sx.valueNumber;
+      break;
+  case "ey":
+      if (aElement.valueNumber < this.sy.valueNumber)
+        aElement.valueNumber = this.sy.valueNumber;
+      break;
+    default:
+  }
+}]]>
+        </body>
+      </method>
+    </implementation>
+  </binding>
+  <binding id="pointbox">
+    <content pack="center" orient="horizontal">
+       <xul:textbox anonid="x" type="number" decimalplaces="1"
+                    min="-6" max="94" size="5"
+                           />
+       <xul:textbox anonid="y" type="number" decimalplaces="1"
+                    min="-122" max="26" size="5"
+                           />
+    <implementation>
+      <field name="mX">null</field>
+      <field name="mY">null</field>
+      <property name="x">
+        <getter>
+          if (!this.mX) {
+            this.mX = document.getAnonymousElementByAttribute(this, "anonid", "x");
+          }
+          return this.mX;
+        </getter>
+      </property>
+      <property name="y">
+        <getter>
+          if (!this.mY) {
+            this.mY = document.getAnonymousElementByAttribute(this, "anonid", "y");
+          }
+          return this.mY;
+        </getter>
+      </property>
+      <property name="value">
+        <getter>
+          return this.x.value + " " + this.y.value;
+        </getter>
+        <setter>
+          <![CDATA[
+          this.setAttribute("value", val);
+          var array = val.toString().trim().split(" ");
+          while(array.length < 2) {
+            array.push(0);
+          }
+          this.x.value = array[0];
+          this.y.value = array[1];
+          return val;
+          ]]>
+        </setter>
+      </property>
+      <constructor>
+        this.value = this.hasAttribute("value")?
+                       this.getAttribute("value") : "0 0";
+      </constructor>
+    </implementation>
+  </binding>
+  
+</bindings>

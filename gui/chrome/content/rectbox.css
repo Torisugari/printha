@@ -1,0 +1,7 @@
+rectbox {
+  -moz-binding: url('chrome://printha/content/rectbox.xml#rectbox');
+}
+
+pointbox {
+  -moz-binding: url('chrome://printha/content/rectbox.xml#pointbox');
+}
