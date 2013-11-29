@@ -1,0 +1,9 @@
+<!-- 
+  Note that this file is just a console-waring sitter. 
+-->
+
+<!ENTITY  brandShortName        "Printha">
+<!ENTITY  brandFullName         "Printha">
+<!ENTITY  vendorShortName       "printhagui">
+<!ENTITY  trademarkInfo.part1   "Printha is not a registered trademark.">
+
