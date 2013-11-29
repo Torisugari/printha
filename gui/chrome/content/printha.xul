@@ -287,19 +287,6 @@
               </groupbox>
             </tabpanel>
             <tabpanel orient="vertical">
-              <vbox>
-                <description>「お年玉付き年賀状」以外で差出人の郵便番号を印刷するための位置補正の値(単位はミリメートル)で、一般的な官製はがきの適正値は(0.0, 15.5)です。</description>
-                <hbox>
-                  <button label="「お年玉付き」に合わせる"
-                          oncommand="this.nextSibling.nextSibling.nextSibling.value='0 0';"
-                          />
-                  <button label="普通のはがきに合わせる"
-                          oncommand="this.nextSibling.nextSibling.value='0 15.5';"
-                          />
-                  <spacer flex="1" />
-                  <pointbox id="sendfrom_zipframe_offset" value="0 0"/>
-                </hbox>
-              </vbox>
 <tabbox>
   <tabs>
     <tab label="宛先の名前"/>
@@ -657,13 +644,27 @@
     </tabpanel>
   </tabpanels>
 </tabbox>
+              <groupbox orient="vertical">
+                <caption label="差出人郵便番号の位置補正"/>
+                <description>「お年玉付き年賀状」以外で差出人の郵便番号を印刷するための位置補正の値で単位はミリメートルです。一般的な官製はがきの適正値は(0.0, 15.5)です。</description>
+                <hbox>
+                  <button label="「お年玉付き」に合わせる"
+                          oncommand="this.nextSibling.nextSibling.nextSibling.value='0 0';"
+                          />
+                  <button label="普通のはがきに合わせる"
+                          oncommand="this.nextSibling.nextSibling.value='0 15.5';"
+                          />
+                  <spacer flex="1" />
+                  <pointbox id="sendfrom_zipframe_offset" value="0 0"/>
+                </hbox>
+              </groupbox>
             </tabpanel>
             <tabpanel orient="vertical">
               <description>普通の官製はがきを年賀状として使う場合、「年賀」と書いておくと、前もって投函しても元旦以降に届けられます。</description>
               <checkbox id="drawnenga" label="切手の下側に「年賀」と朱筆する。" checked="false" />
 <description>郵便番号の枠が付いていない白紙をはがきとして使う場合、宛先の郵便番号には赤枠またはハイフンを付ける必要があります。Printhaはハイフンの挿入には対応していないので、赤枠をつけて下さい。</description>
-              <checkbox id="sendto.drawzipframe" label="宛先の郵便番号に赤枠を描画する。" checked="false" />
-              <checkbox id="sendfrom.drawzipframe" label="差出人の郵便番号の点線で赤枠を描画する。" checked="false" />
+              <checkbox id="sendto.drawzipframe" label="宛先の郵便番号欄に赤い枠を描画する。" checked="false" />
+              <checkbox id="sendfrom.drawzipframe" label="差出人の郵便番号欄に赤い枠を点線で描画する。" checked="false" />
             </tabpanel>
           </tabpanels>
         </tabbox>
