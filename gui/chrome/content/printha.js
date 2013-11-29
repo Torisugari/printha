@@ -104,7 +104,7 @@ var gPrinthaSettings = {
 
   get firstAddressData() {
     if (this.isDirectInput) {
-      this.directInputData;
+      return this.directInputData;
     }
 
     return this.formatLine(this._addressData[0], this.hono, this.isExtraEnabled);

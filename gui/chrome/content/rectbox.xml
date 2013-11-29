@@ -28,24 +28,23 @@ THE SOFTWARE.
   xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   xmlns:xbl="http://www.mozilla.org/xbl">
   <binding id="rectbox">
-    <content pack="center">
-      <xul:vbox>
+    <content pack="center" orient="vertical">
 <xul:hbox>
                   <xul:textbox anonid="sx" type="number" decimalplaces="6"
                            min="0" max="283.464567" size="10"
-                           onchange="this.parentNode.parentNode.parentNode.validate(this)"
+                           onchange="this.parentNode.parentNode.validate(this)"
                            />
                   <xul:textbox anonid="sy" type="number" decimalplaces="6"
                            min="0" max="419.527559" size="10"
-                           onchange="this.parentNode.parentNode.parentNode.validate(this)"
+                           onchange="this.parentNode.parentNode.validate(this)"
                            />
                   <xul:textbox anonid="ex" type="number" decimalplaces="6"
                            min="0" max="283.464567" size="10"
-                           onchange="this.parentNode.parentNode.parentNode.validate(this)"
+                           onchange="this.parentNode.parentNode.validate(this)"
                            />
                   <xul:textbox anonid="ey" type="number" decimalplaces="6"
                            min="0" max="419.527559" size="10"
-                           onchange="this.parentNode.parentNode.parentNode.validate(this)"
+                           onchange="this.parentNode.parentNode.validate(this)"
                            />
 </xul:hbox>
 
@@ -58,33 +57,31 @@ THE SOFTWARE.
   </xul:vbox>
   <xul:vbox>
     <xul:spacer flex="1" />
-    <xul:button label="⇦" oncommand="this.parentNode.parentNode.parentNode.parentNode.goLeft()"/>
+    <xul:button label="⇦" oncommand="this.parentNode.parentNode.parentNode.goLeft()"/>
     <xul:spacer flex="1" />
   </xul:vbox>
   <xul:vbox>
-    <xul:button label="⇧" oncommand="this.parentNode.parentNode.parentNode.parentNode.goUp();"/>
-    <xul:button label="⇩" oncommand="this.parentNode.parentNode.parentNode.parentNode.goDown()"/>
+    <xul:button label="⇧" oncommand="this.parentNode.parentNode.parentNode.goUp();"/>
+    <xul:button label="⇩" oncommand="this.parentNode.parentNode.parentNode.goDown()"/>
   </xul:vbox>
   <xul:vbox>
     <xul:spacer flex="1" />
-    <xul:button label="⇨" oncommand="this.parentNode.parentNode.parentNode.parentNode.goRight()"/>
+    <xul:button label="⇨" oncommand="this.parentNode.parentNode.parentNode.goRight()"/>
     <xul:spacer flex="1" />
   </xul:vbox>
   <xul:vbox>
-    <xul:button label="↔+" oncommand="this.parentNode.parentNode.parentNode.parentNode.hWider()"/>
+    <xul:button label="↔+" oncommand="this.parentNode.parentNode.parentNode.hWider()"/>
     <xul:spacer flex="1" />
-    <xul:button label="↔-" oncommand="this.parentNode.parentNode.parentNode.parentNode.hNarrower()"/>
+    <xul:button label="↔-" oncommand="this.parentNode.parentNode.parentNode.hNarrower()"/>
   </xul:vbox>
   <xul:vbox>
-    <xul:button label="↕+" oncommand="this.parentNode.parentNode.parentNode.parentNode.vWider()"/>
+    <xul:button label="↕+" oncommand="this.parentNode.parentNode.parentNode.vWider()"/>
     <xul:spacer flex="1" />
-    <xul:button label="↕-" oncommand="this.parentNode.parentNode.parentNode.parentNode.vNarrower()"/>
+    <xul:button label="↕-" oncommand="this.parentNode.parentNode.parentNode.vNarrower()"/>
   </xul:vbox>
 </xul:hbox>
-
-
-      </xul:vbox>
     </content>
+
     <implementation>
       <field name="mSX">null</field>
       <field name="mSY">null</field>
@@ -298,6 +295,7 @@ THE SOFTWARE.
        <xul:textbox anonid="y" type="number" decimalplaces="1"
                     min="-122" max="26" size="5"
                            />
+    </content>
     <implementation>
       <field name="mX">null</field>
       <field name="mY">null</field>
