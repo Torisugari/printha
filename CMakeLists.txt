@@ -79,7 +79,7 @@ else(USE_SRCDIR_FILES)
   install(DIRECTORY gui DESTINATION ${INSTALL_DATA_DIR})
   install(DIRECTORY settings DESTINATION ${INSTALL_DATA_DIR})
   install(DIRECTORY resources DESTINATION ${INSTALL_DATA_DIR})
-  install(FILES printha.gui
+  install(FILES ${PROJECT_BINARY_DIR}/printha.gui
           DESTINATION "${INSTALL_DATA_DIR}"
           COMPONENT script)
 endif(USE_SRCDIR_FILES)
