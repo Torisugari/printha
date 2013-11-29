@@ -110,7 +110,7 @@ var gPrinthaSettings = {
               document.getElementById("sendfrom.zipcode").value + ";" +
               document.getElementById("sendfrom.address").value;
     if (!this.isExtraEnabled)
-      return;
+      return val;
 
     for (var i = 0; i < 6; i++) {
       val += ";" + document.getElementById("sendfrom.extra[" + i + "]").value;
