@@ -359,7 +359,7 @@ function toggleExtra (aHidden) {
   sendfromStyle.hidden = aHidden;
   sendtoStyle.hidden = aHidden;
 
-  if (aHidden && (sendfromStyle.selected || styleSendto.selcted)) {
+  if (aHidden && (sendfromStyle.selected || styleSendto.selected)) {
     sendfromStyle.parentNode.selectedIndex = 0;
   }
 
