@@ -60,6 +60,8 @@ set(INSTALL_DATA_DIR share/printha CACHE PATH
 option(USE_SRCDIR_FILES
        "Use files in source dir instead of those in installed dir" OFF)
 
+# XXX There's no smart way to check whether Firefox or XULRunner is installed.
+option(ENABLE_GUI "XULRunner application" ON)
 
 if(USE_SRCDIR_FILES)
   set(PRINTHA_BINDIR "${PROJECT_BINARY_DIR}")
@@ -68,12 +70,14 @@ if(USE_SRCDIR_FILES)
 else(USE_SRCDIR_FILES)
   set(PRINTHA_BINDIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_BIN_DIR}")
   set(PRINTHA_DATADIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}")
-  install(DIRECTORY gui DESTINATION ${INSTALL_DATA_DIR})
   install(DIRECTORY settings DESTINATION ${INSTALL_DATA_DIR})
   install(DIRECTORY resources DESTINATION ${INSTALL_DATA_DIR})
+if(ENABLE_GUI)
+  install(DIRECTORY gui DESTINATION ${INSTALL_DATA_DIR})
   install(FILES ${PROJECT_BINARY_DIR}/printha.gui
           DESTINATION "${INSTALL_DATA_DIR}"
           COMPONENT script)
+endif(ENABLE_GUI)
 endif(USE_SRCDIR_FILES)
 
 add_definitions(-DPRINTHA_DATADIR=\"${PRINTHA_DATADIR}\")

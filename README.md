@@ -64,8 +64,19 @@ Fedoraでは、Harfbuzzパッケージが配布されているので、ビルド
     make
     sudo make install
 
-を実行してください。実行ファイルへのパスが把握できているなら、最後のsudo make installは省
-略しても構いません。
+を実行してください。
+
+もし、何らかの理由でインストールしたくない場合は、cmakeに"-DUSE_SRCDIR_FILES=ON"
+を渡してフラグを有効にすると、パスが正常に通るようになります。
+
+    git clone git://github.com/Torisugari/printha.git
+    cd printha
+    mkdir build
+    cd build
+    cmake .. -DUSE_SRCDIR_FILES=ON
+    make release
+    make
+
 
 インストールした後
 ----------------
@@ -198,15 +209,22 @@ GUI版のprinthaはインストールしていなくても利用できます。
 
 resourcesディレクトリに収録されているIPAex明朝フォントとdemoに収録されている各PDFファイル
 のフォントについては、同梱のIPAフォントライセンスv1.0が適用されます。
+
 配布元: [IPAフォント/IPAexフォント　ダウンロードトップページ](http://ipafont.ipa.go.jp/)
 
 resourcesディレクトリに収録されているOCRB_aizuフォントについては、SIL Open Font License
 1.1が適用されます。
+
 配布元: [発生事例:OCRBフォントが使用できない 会津若松市](http://www.city.aizuwakamatsu.fukushima.jp/docs/2008021400265/)
 
 このソフトウェアがフォントを同梱している理由は、ユーザーがフォントのパスを自力で
 設定する困難を慮ってのものなので、ソフトウェア自体が特定のフォントの設定に基づいて
 実装されているわけではありません。
+
+gui/modulesディレクトリに収録されているJavaScriptのCSVパーサーは、Daniel Tillinによる
+csvToArray v2.1です。
+
+配布元: [csv-to-array - Comma seperated values CSV to Array Javascript and jQuery functions ](https://code.google.com/p/csv-to-array/)
 
 フォント以外のソフトウェアはMITライセンスで、設定や住所のファイルはパブリックドメイン
 とします。
