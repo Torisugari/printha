@@ -1,2 +1,8 @@
 #!/bin/sh
 xargs rm < ${PROJECT_BINARY_DIR}/install_manifest.txt
+rm -r ${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/gui
+rm -r ${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/settings
+rm -r ${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/resources
+
+# Don't delete recursively!
+rmdir ${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}

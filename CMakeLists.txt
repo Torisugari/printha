@@ -34,7 +34,7 @@ LINK_DIRECTORIES(${FONTCONFIG_LIBRARY_DIRS})
 LINK_LIBRARIES(${FONTCONFIG_LIBRARIES})
 
 set(CMAKE_C_FLAGS "-Wall")
-set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -DCMAKE_SOURCE_DIR=\\\"${CMAKE_SOURCE_DIR}\\\"")
+set(CMAKE_CXX_FLAGS "-Wall -std=c++11")
 
 ADD_CUSTOM_TARGET(debug
                     ${CMAKE_COMMAND} 
@@ -52,17 +52,39 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_INSTALL_RPATH "${HARFBUZZ_LIBRARY_DIRS}")
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
 
+# Make it possible to overwrite these settings.
+set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
+set(INSTALL_DATA_DIR share/printha CACHE PATH
+    "Installation directory for data files")
+
+option(USE_SRCDIR_FILES
+       "Use files in source dir instead of those in installed dir" OFF)
+
 # Uninstaller
 configure_file ("${PROJECT_SOURCE_DIR}/src/uninstall.sh.in"
-                "${PROJECT_BINARY_DIR}/uninstall.sh")
+                uninstall.sh)
 
 # GUI Launcher
 configure_file ("${PROJECT_SOURCE_DIR}/src/printha.gui.in"
-                "${PROJECT_BINARY_DIR}/printha.gui")
+                printha.gui)
 
+
+if(USE_SRCDIR_FILES)
+  set(PRINTHA_BINDIR "${PROJECT_BINARY_DIR}")
+  set(PRINTHA_DATADIR "${PROJECT_SOURCE_DIR}")
+  add_definitions(-DPRINTHA_USE_SRCDIR_FILES=1)
+else(USE_SRCDIR_FILES)
+  set(PRINTHA_BINDIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_BIN_DIR}")
+  set(PRINTHA_DATADIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}")
+  install(DIRECTORY gui DESTINATION ${INSTALL_DATA_DIR})
+  install(DIRECTORY settings DESTINATION ${INSTALL_DATA_DIR})
+  install(DIRECTORY resources DESTINATION ${INSTALL_DATA_DIR})
+  install(FILES printha.gui
+          DESTINATION "${INSTALL_DATA_DIR}"
+          COMPONENT script)
+endif(USE_SRCDIR_FILES)
+
+add_definitions(-DPRINTHA_DATADIR=\"${PRINTHA_DATADIR}\")
 add_executable(printha src/printha_settings.cpp src/printha.cpp)
-
-set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
-install(TARGETS printha
-        RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin)
+install(TARGETS printha RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin)
 
