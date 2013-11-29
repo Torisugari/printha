@@ -60,14 +60,6 @@ set(INSTALL_DATA_DIR share/printha CACHE PATH
 option(USE_SRCDIR_FILES
        "Use files in source dir instead of those in installed dir" OFF)
 
-# Uninstaller
-configure_file ("${PROJECT_SOURCE_DIR}/src/uninstall.sh.in"
-                uninstall.sh)
-
-# GUI Launcher
-configure_file ("${PROJECT_SOURCE_DIR}/src/printha.gui.in"
-                printha.gui)
-
 
 if(USE_SRCDIR_FILES)
   set(PRINTHA_BINDIR "${PROJECT_BINARY_DIR}")
@@ -85,6 +77,15 @@ else(USE_SRCDIR_FILES)
 endif(USE_SRCDIR_FILES)
 
 add_definitions(-DPRINTHA_DATADIR=\"${PRINTHA_DATADIR}\")
+
+# Uninstaller
+configure_file ("${PROJECT_SOURCE_DIR}/src/uninstall.sh.in"
+                uninstall.sh)
+
+# GUI Launcher
+configure_file ("${PROJECT_SOURCE_DIR}/src/printha.gui.in"
+                printha.gui)
+
 add_executable(printha src/printha_settings.cpp src/printha.cpp)
 install(TARGETS printha RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin)
 
