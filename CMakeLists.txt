@@ -91,5 +91,8 @@ configure_file ("${PROJECT_SOURCE_DIR}/src/printha.gui.in"
                 printha.gui)
 
 add_executable(printha src/printha_settings.cpp src/printha.cpp)
-install(TARGETS printha RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin)
+install(TARGETS printha
+        RUNTIME
+        DESTINATION "${CMAKE_INSTALL_BINDIR}"
+        COMPONENT bin)
 
