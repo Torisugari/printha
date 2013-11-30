@@ -49,46 +49,49 @@ THE SOFTWARE.
                            />
 </xul:hbox>
 
-<xul:hbox>
-  <xul:vbox>
-    <xul:spacer flex="1" />
-    <xul:textbox anonid="increment" type="number"
-                 min="1" max="99" size="2" value="5"/>
-    <xul:spacer flex="1" />
-  </xul:vbox>
-  <xul:vbox>
-    <xul:spacer flex="1" />
-    <xul:button label="⇦" oncommand="this.parentNode.parentNode.parentNode.goLeft()"/>
-    <xul:spacer flex="1" />
-  </xul:vbox>
-  <xul:vbox>
-    <xul:button label="⇧" oncommand="this.parentNode.parentNode.parentNode.goUp();"/>
-    <xul:button label="⇩" oncommand="this.parentNode.parentNode.parentNode.goDown()"/>
-  </xul:vbox>
-  <xul:vbox>
-    <xul:spacer flex="1" />
-    <xul:button label="⇨" oncommand="this.parentNode.parentNode.parentNode.goRight()"/>
-    <xul:spacer flex="1" />
-  </xul:vbox>
-  <xul:vbox>
-    <xul:button label="↔+" oncommand="this.parentNode.parentNode.parentNode.hWider()"/>
-    <xul:spacer flex="1" />
-    <xul:button label="↔-" oncommand="this.parentNode.parentNode.parentNode.hNarrower()"/>
-  </xul:vbox>
-  <xul:vbox>
-    <xul:button label="↕+" oncommand="this.parentNode.parentNode.parentNode.vWider()"/>
-    <xul:spacer flex="1" />
-    <xul:button label="↕-" oncommand="this.parentNode.parentNode.parentNode.vNarrower()"/>
-  </xul:vbox>
-</xul:hbox>
-
-<xul:hbox>
-<xul:spacer flex="1"/>
-<html:canvas anonid="canvas" width="100" height="148"/>
-<xul:spacer flex="1"/>
-</xul:hbox>
+      <xul:hbox>
+        <xul:spacer flex="1" />
+        <html:canvas anonid="canvas" width="100" height="148" />
+        <xul:spacer flex="1" />
+        <xul:vbox pack="center">
+          <xul:hbox pack="center">
+            <xul:vbox pack="center">
+              <xul:toolbarbutton label="⇦"
+                                 oncommand="this.parentNode.parentNode.parentNode.parentNode.parentNode.goLeft()" />
+            </xul:vbox>
+            <xul:vbox pack="center">
+              <xul:toolbarbutton label="⇧"
+                                 oncommand="this.parentNode.parentNode.parentNode.parentNode.parentNode.goUp();" />
+              <xul:label value="　" />
+              <xul:toolbarbutton label="⇩"
+                                 oncommand="this.parentNode.parentNode.parentNode.parentNode.parentNode.goDown()" />
+            </xul:vbox>
+            <xul:vbox pack="center">
+              <xul:toolbarbutton label="⇨"
+                                 oncommand="this.parentNode.parentNode.parentNode.parentNode.parentNode.goRight()" />
+            </xul:vbox>
+            <xul:vbox pack="center">
+              <xul:hbox pack="center">
+                <xul:label value="↔" />
+                <xul:spinbuttons
+onup="this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.hWider()"
+ondown="this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.hNarrower()" />
+                <xul:label value="↕" />
+                <xul:spinbuttons
+onup="this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.vWider()" 
+ondown="this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.vNarrower()" />
+              </xul:hbox>
+            </xul:vbox>
+          </xul:hbox>
+          <xul:hbox>
+            <xul:textbox anonid="increment" type="number" decimalplaces="2"
+                         min="1" max="99" size="4" value="5" />
+            <xul:label value="Ptずつ動かす。" />
+          </xul:hbox>
+        </xul:vbox>
+        <xul:spacer flex="1" />
+      </xul:hbox>
     </content>
-
     <implementation>
       <field name="mSX">null</field>
       <field name="mSY">null</field>
