@@ -3,12 +3,14 @@
 if type "firefox" >/dev/null 2>&1; then
   # Launch printha-gui via Firefox if possible.
   firefox -app ${PRINTHA_DATADIR}/gui/application.ini \
-          -printha-bin ${PRINTHA_BINDIR}/printha
+          -printha-bin ${PRINTHA_BINDIR}/printha \
+          -printha-config ${PRINTHA_DATADIR}/settings/config.txt
 else
   # Otherwise, find XULRunner
   if type "xulrunner" >/dev/null 2>&1; then
     xulrunner ${PRINTHA_DATADIR}/gui/application.ini \
-              -printha-bin ${PRINTHA_BINDIR}/printha
+              -printha-bin ${PRINTHA_BINDIR}/printha \
+              -printha-config ${PRINTHA_DATADIR}/settings/config.txt
   else
     # It's so rude that the name may not be "xulrunner".
     # Instead, find "xulrunner-17.0" etc.
@@ -20,7 +22,8 @@ else
       fi
     fi
     exec $XULRUNNER_PATH ${PRINTHA_DATADIR}/gui/application.ini \
-         -printha-bin ${PRINTHA_BINDIR}/printha
+         -printha-bin ${PRINTHA_BINDIR}/printha \
+         -printha-config ${PRINTHA_DATADIR}/settings/config.txt
   fi
 fi
 

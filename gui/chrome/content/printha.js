@@ -175,7 +175,7 @@ var gPrinthaSettings = {
       }
       const reg = /^([a-zA-Z0-9\.\[\]]+)/;
       if (reg.test(line)) {
-        var key = RegExp.$1;
+        var key = RegExp.$1.toLowerCase();
         var value = line.replace(reg, "").trim();
 
         if (this.configValueKeys[key]) {
@@ -373,7 +373,10 @@ function loadConfig() {
       rv != Components.interfaces.nsIFilePicker.returnReplace) {
     return;
   }
+  loadConfigFile(fp.file);
+}
 
+function loadConfigFile (aFile) {
   function callback(aInputStream, aStatus) {
     if (!Components.isSuccessCode(aStatus)) {
       return;
@@ -391,7 +394,7 @@ function loadConfig() {
                                       kOption);
   }
 
-  NetUtil.asyncFetch(fp.file, callback);
+  NetUtil.asyncFetch(aFile, callback);
 }
 
 function saveTextFile(aData, aFileLeaf) {
@@ -620,8 +623,20 @@ function startup(aEvent) {
                  .QueryInterface(Components.interfaces.nsICommandLine);
 
   gPrinthaSettings.binpath = cl.handleFlagWithParam("printha-bin", false);
-  FileUtils.getDir("TmpD", ["printha"]);
 
+  var startupconfig = cl.handleFlagWithParam("printha-config", false);
+
+  if (startupconfig) {
+    var file = Components.classes["@mozilla.org/file/local;1"]
+                         .createInstance(Components.interfaces.nsILocalFile);
+    file.initWithPath(startupconfig);
+
+    if (file.exists()) {
+      loadConfigFile(file);
+    }
+  }
+
+  FileUtils.getDir("TmpD", ["printha"]);
   setTimeout(delayedStartup, 100);
 }
 
