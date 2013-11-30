@@ -25,22 +25,6 @@ Components.utils.import("resource://gre/modules/NetUtil.jsm");
 Components.utils.import("resource://printha/csvparser.js");
 
 var gPrinthaSettings = {
-  get "font" () {
-    return document.getElementById("font-list").selectedItem.value;
-  },
-
-  get "zipfont" () {
-    return document.getElementById("zipfont-list").selectedItem.value;
-  },
-
-  set "font" (aValue) {
-    document.getElementById("font-list").value = aValue;
-  },
-
-  set "zipfont" (aValue) {
-    document.getElementById("zipfont-list").value = aValue;
-  },
-
   set addressData(aData) {
     this._addressData = aData;
     var i;
@@ -164,17 +148,20 @@ var gPrinthaSettings = {
 
   get configData() {
     var data = "";
-    for (var i in this.configKeys) {
-      var key = this.configKeys[i]; 
-      data += key + " " + this[key] + "\n";
-    }
-    for (var i in this.configValueKeys) {
-      var key = this.configValueKeys[i]; 
+    for (var key in this.configValueKeys) {
       data += key + " " + document.getElementById(key).value + "\n";
     }
-    for (var i in this.configCheckedKeys) {
-      var key = this.configCheckedKeys[i]; 
+    for (var key in this.configCheckedKeys) {
       data += key + " " + document.getElementById(key).checked + "\n";
+    }
+    return data;
+  },
+
+  get configPathData() {
+    var data = "";
+    for (var i in this.configPathKeys) {
+      var key = this.configPathKeys[i]; 
+      data += key + " " + this[key] + "\n";
     }
     return data;
   },
@@ -190,39 +177,18 @@ var gPrinthaSettings = {
       if (reg.test(line)) {
         var key = RegExp.$1;
         var value = line.replace(reg, "").trim();
-        var found = false;
-        if (key == "font") {
-          this["font"] = value;
+
+        if (this.configValueKeys[key]) {
+          document.getElementById(key).value = value;
           continue;
         }
 
-        if (key == "zipfont") {
-          this["zipfont"] = value;
-          continue;
-        }
-
-        for (var i in this.configValueKeys) {
-          if (key == this.configValueKeys[i]) {
-            document.getElementById(key).value = value;
-            found = true;
-            break;
+        if (this.configCheckedKeys[key]) {
+          if (value == "true") {
+            document.getElementById(key).checked = true;
           }
-        }
-
-        if (found) {
-          continue;
-        }
-
-        for (var i in this.configCheckedKeys) {
-          if (key == this.configCheckedKeys[i]) {
-            if (value == "true") {
-              document.getElementById(key).checked = true;
-              break;
-            }
-            else if (value == "false") {
-              document.getElementById(key).checked = false;
-              break;
-            }
+          else if (value == "false") {
+            document.getElementById(key).checked = false;
           }
         }
       }
@@ -234,108 +200,99 @@ var gPrinthaSettings = {
     return val? val : "";
   },
 
-  configKeys: ["sendfrompath", "outputpath", "font", "zipfont"],
-  configValueKeys: [
-    "sendto.zipfontsize",
-    "sendfrom.zipfontsize",
-    "sendto.name.fontsize",
-    "sendto.addr.fontsize",
-    "sendfrom.addr.fontsize",
-    "sendfrom.name.fontsize",
-    "sendfrom_zipframe_offset",
-    "sendfrom.addr.whitespace",
-    "sendfrom.name.whitespace",
-    "sendto.addr.whitespace",
-    "sendto.name.whitespace",
-    "sendto.name.rect",
-    "sendto.addr.rect",
-    "sendfrom.name.rect",
-    "sendfrom.addr.rect",
-    "sendto.extra[0].rect",
-    "sendto.extra[0].whitespace",
-    "sendto.extra[0].fontsize",
-    "sendto.extra[1].rect",
-    "sendto.extra[1].whitespace",
-    "sendto.extra[1].fontsize",
-    "sendto.extra[2].rect",
-    "sendto.extra[2].whitespace",
-    "sendto.extra[2].fontsize",
-    "sendto.extra[3].rect",
-    "sendto.extra[3].whitespace",
-    "sendto.extra[3].fontsize",
-    "sendto.extra[4].rect",
-    "sendto.extra[4].whitespace",
-    "sendto.extra[4].fontsize",
-    "sendto.extra[5].rect",
-    "sendto.extra[5].whitespace",
-    "sendto.extra[5].fontsize",
-    "sendfrom.extra[0].rect",
-    "sendfrom.extra[0].whitespace",
-    "sendfrom.extra[0].fontsize",
-    "sendfrom.extra[1].rect",
-    "sendfrom.extra[1].whitespace",
-    "sendfrom.extra[1].fontsize",
-    "sendfrom.extra[2].rect",
-    "sendfrom.extra[2].whitespace",
-    "sendfrom.extra[2].fontsize",
-    "sendfrom.extra[3].rect",
-    "sendfrom.extra[3].whitespace",
-    "sendfrom.extra[3].fontsize",
-    "sendfrom.extra[4].rect",
-    "sendfrom.extra[4].whitespace",
-    "sendfrom.extra[4].fontsize",
-    "sendfrom.extra[5].rect",
-    "sendfrom.extra[5].whitespace",
-    "sendfrom.extra[5].fontsize"
-  ],
-  configCheckedKeys: [
-    "sendto.extra[0].stretch",
-    "sendto.extra[0].bottom",
-    "sendto.extra[1].stretch",
-    "sendto.extra[1].bottom",
-    "sendto.extra[2].stretch",
-    "sendto.extra[2].bottom",
-    "sendto.extra[3].stretch",
-    "sendto.extra[3].bottom",
-    "sendto.extra[4].stretch",
-    "sendto.extra[4].bottom",
-    "sendto.extra[5].stretch",
-    "sendto.extra[5].bottom",
+  configPathKeys: ["sendfrompath", "outputpath"],
+  configValueKeys: {
+    "font": true,
+    "zipfont": true,
+    "sendto.zipfontsize": true,
+    "sendfrom.zipfontsize": true,
+    "sendto.name.fontsize": true,
+    "sendto.addr.fontsize": true,
+    "sendfrom.addr.fontsize": true,
+    "sendfrom.name.fontsize": true,
+    "sendfrom_zipframe_offset": true,
+    "sendfrom.addr.whitespace": true,
+    "sendfrom.name.whitespace": true,
+    "sendto.addr.whitespace": true,
+    "sendto.name.whitespace": true,
+    "sendto.name.rect": true,
+    "sendto.addr.rect": true,
+    "sendfrom.name.rect": true,
+    "sendfrom.addr.rect": true,
+    "sendto.extra[0].rect": true,
+    "sendto.extra[0].whitespace": true,
+    "sendto.extra[0].fontsize": true,
+    "sendto.extra[1].rect": true,
+    "sendto.extra[1].whitespace": true,
+    "sendto.extra[1].fontsize": true,
+    "sendto.extra[2].rect": true,
+    "sendto.extra[2].whitespace": true,
+    "sendto.extra[2].fontsize": true,
+    "sendto.extra[3].rect": true,
+    "sendto.extra[3].whitespace": true,
+    "sendto.extra[3].fontsize": true,
+    "sendto.extra[4].rect": true,
+    "sendto.extra[4].whitespace": true,
+    "sendto.extra[4].fontsize": true,
+    "sendto.extra[5].rect": true,
+    "sendto.extra[5].whitespace": true,
+    "sendto.extra[5].fontsize": true,
+    "sendfrom.extra[0].rect": true,
+    "sendfrom.extra[0].whitespace": true,
+    "sendfrom.extra[0].fontsize": true,
+    "sendfrom.extra[1].rect": true,
+    "sendfrom.extra[1].whitespace": true,
+    "sendfrom.extra[1].fontsize": true,
+    "sendfrom.extra[2].rect": true,
+    "sendfrom.extra[2].whitespace": true,
+    "sendfrom.extra[2].fontsize": true,
+    "sendfrom.extra[3].rect": true,
+    "sendfrom.extra[3].whitespace": true,
+    "sendfrom.extra[3].fontsize": true,
+    "sendfrom.extra[4].rect": true,
+    "sendfrom.extra[4].whitespace": true,
+    "sendfrom.extra[4].fontsize": true,
+    "sendfrom.extra[5].rect": true,
+    "sendfrom.extra[5].whitespace": true,
+    "sendfrom.extra[5].fontsize" : true
+  },
+  configCheckedKeys: {
+    "sendto.extra[0].stretch": true,
+    "sendto.extra[0].bottom": true,
+    "sendto.extra[1].stretch": true,
+    "sendto.extra[1].bottom": true,
+    "sendto.extra[2].stretch": true,
+    "sendto.extra[2].bottom": true,
+    "sendto.extra[3].stretch": true,
+    "sendto.extra[3].bottom": true,
+    "sendto.extra[4].stretch": true,
+    "sendto.extra[4].bottom": true,
+    "sendto.extra[5].stretch": true,
+    "sendto.extra[5].bottom": true,
 
-    "sendfrom.extra[0].stretch",
-    "sendfrom.extra[0].bottom",
-    "sendfrom.extra[1].stretch",
-    "sendfrom.extra[1].bottom",
-    "sendfrom.extra[2].stretch",
-    "sendfrom.extra[2].bottom",
-    "sendfrom.extra[3].stretch",
-    "sendfrom.extra[3].bottom",
-    "sendfrom.extra[4].stretch",
-    "sendfrom.extra[4].bottom",
-    "sendfrom.extra[5].stretch",
-    "sendfrom.extra[5].bottom",
-    "drawnenga",
-    "sendto.drawzipframe",
-    "sendfrom.drawzipframe",
-    "sendto.name.stretch",
-    "sendto.addr.stretch",
-    "sendfrom.name.stretch",
-    "sendfrom.addr.stretch",
-    "sendto.name.bottom",
-    "sendto.addr.bottom",
-    "sendfrom.name.bottom",
-    "sendfrom.addr.bottom"
-  ],
-  configValuesKeys: [
-  ],
-  valuesById: function(aId) {
-    var values = "";
-    var children = document.getElementById(aId).getElementsByTagName("textbox");
-    var i;
-    for (i = 0; i < children.length; i++) {
-      values += " " + children[i].value;
-    }
-    return values;
+    "sendfrom.extra[0].stretch": true,
+    "sendfrom.extra[0].bottom": true,
+    "sendfrom.extra[1].stretch": true,
+    "sendfrom.extra[1].bottom": true,
+    "sendfrom.extra[2].stretch": true,
+    "sendfrom.extra[2].bottom": true,
+    "sendfrom.extra[3].stretch": true,
+    "sendfrom.extra[3].bottom": true,
+    "sendfrom.extra[4].stretch": true,
+    "sendfrom.extra[4].bottom": true,
+    "sendfrom.extra[5].stretch": true,
+    "sendfrom.extra[5].bottom": true,
+    "drawnenga": true,
+    "sendto.drawzipframe": true,
+    "sendfrom.drawzipframe": true,
+    "sendto.name.stretch": true,
+    "sendto.addr.stretch": true,
+    "sendfrom.name.stretch": true,
+    "sendfrom.addr.stretch": true,
+    "sendto.name.bottom": true,
+    "sendto.addr.bottom": true,
+    "sendfrom.name.bottom": true,
+    "sendfrom.addr.bottom": true
   },
   "sendfrompath" : "",
   "outputpath" : "",
@@ -533,7 +490,8 @@ function print2(aStatus) {
                         .createInstance(Components.interfaces
                                                   .nsIScriptableUnicodeConverter);
     suc.charset = "utf-8";
-    var is = suc.convertToInputStream(gPrinthaSettings.configData);
+    var is = suc.convertToInputStream(gPrinthaSettings.configData +
+                                      gPrinthaSettings.configPathData);
     var os = FileUtils.openSafeFileOutputStream(configFile)
 
     NetUtil.asyncCopy(is, os, print3);
@@ -628,12 +586,12 @@ function startup(aEvent) {
   var names = fl.EnumerateAllFonts(size);
 
   var i;
-  var fontlist = document.getElementById("font-list");
+  var fontlist = document.getElementById("font");
   for (i = 0; i < size.value; i++) {
     fontlist.appendItem(names[i], names[i], fl.getDefaultFont("ja", names[i]));
   }
 
-  fontlist = document.getElementById("zipfont-list");
+  fontlist = document.getElementById("zipfont");
   for (i = 0; i < size.value; i++) {
     fontlist.appendItem(names[i], names[i], fl.getDefaultFont("ja", names[i]));
   }
@@ -659,114 +617,4 @@ function enddown(aEvent) {
 
 window.addEventListener("unload", enddown, false);
 window.addEventListener("load", startup, false);
-
-function hNarrower(aElement) {
-  var numbers = aElement.parentNode
-                        .parentNode
-                        .previousSibling.getElementsByTagName("textbox");
-  var sx = parseFloat(numbers[0].value) + 0.5;
-  var ex = parseFloat(numbers[2].value) - 0.5;
-
-  if (sx <= ex) {
-    numbers[0].value = sx;
-    numbers[2].value = ex;
-  }
-}
-
-function vNarrower(aElement) {
-  var numbers = aElement.parentNode
-                        .parentNode
-                        .previousSibling.getElementsByTagName("textbox");
-  var sy = parseFloat(numbers[1].value) + 0.5;
-  var ey = parseFloat(numbers[3].value) - 0.5;
-
-  if (sy <= ey) {
-    numbers[1].value = sy;
-    numbers[3].value = ey;
-  }
-}
-
-function hWider(aElement) {
-  var numbers = aElement.parentNode
-                        .parentNode
-                        .previousSibling.getElementsByTagName("textbox");
-  var sx = parseFloat(numbers[0].value) - 0.5;
-  var ex = parseFloat(numbers[2].value) + 0.5;
-
-  if ((parseFloat(numbers[0].min) <= sx) &&
-      ex <= (parseFloat(numbers[2].max))) {
-    numbers[0].value = sx;
-    numbers[2].value = ex;
-  }
-}
-
-function vWider(aElement) {
-  var numbers = aElement.parentNode
-                        .parentNode
-                        .previousSibling.getElementsByTagName("textbox");
-  var sy = parseFloat(numbers[1].value) - 0.5;
-  var ey = parseFloat(numbers[3].value) + 0.5;
-
-  if ((parseFloat(numbers[1].min) <= sy) &&
-      ey <= (parseFloat(numbers[3].max))) {
-    numbers[1].value = sy;
-    numbers[3].value = ey;
-  }
-}
-
-function goLeft(aElement) {
-  var numbers = aElement.parentNode
-                        .parentNode
-                        .previousSibling.getElementsByTagName("textbox");
-  var sx = parseFloat(numbers[0].value) - 1.0;
-  var ex = parseFloat(numbers[2].value) - 1.0;
-
-  if ((parseFloat(numbers[0].min) <= sx) &&
-      (parseFloat(numbers[2].min) <= ex)) {
-    numbers[0].value = sx;
-    numbers[2].value = ex;
-  }
-}
-
-function goRight(aElement) {
-  var numbers = aElement.parentNode
-                        .parentNode
-                        .previousSibling.getElementsByTagName("textbox");
-  var sx = parseFloat(numbers[0].value) + 1.0;
-  var ex = parseFloat(numbers[2].value) + 1.0;
-
-  if ((parseFloat(numbers[0].max) >= sx) &&
-      (parseFloat(numbers[2].max) >= ex)) {
-    numbers[0].value = sx;
-    numbers[2].value = ex;
-  }
-}
-
-function goUp(aElement) {
-  var numbers = aElement.parentNode
-                        .parentNode
-                        .previousSibling.getElementsByTagName("textbox");
-  var sy = parseFloat(numbers[1].value) - 1.0;
-  var ey = parseFloat(numbers[3].value) - 1.0;
-
-  if ((parseFloat(numbers[1].min) <= sy) &&
-      (parseFloat(numbers[3].min) <= ey)) {
-    numbers[1].value = sy;
-    numbers[3].value = ey;
-  }
-}
-
-function goDown(aElement) {
-  var numbers = aElement.parentNode
-                        .parentNode
-                        .previousSibling.getElementsByTagName("textbox");
-  var sy = parseFloat(numbers[1].value) + 1.0;
-  var ey = parseFloat(numbers[3].value) + 1.0;
-
-  if ((parseFloat(numbers[1].max) >= sy) &&
-      (parseFloat(numbers[3].max) >= ey)) {
-    numbers[1].value = sy;
-    numbers[3].value = ey;
-  }
-}
 

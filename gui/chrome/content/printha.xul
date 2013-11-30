@@ -240,7 +240,7 @@ THE SOFTWARE.
               <groupbox orient="vertical">
                 <caption label="郵便番号のフォント" />
                 <hbox>
-                  <menulist id="zipfont-list" flex="1">
+                  <menulist id="zipfont" flex="1">
                     <menupopup>
                       <menuitem label="OCRB" value="OCRB" />
                       <menuseparator />
@@ -268,7 +268,7 @@ THE SOFTWARE.
               <groupbox>
                 <caption label="名前・住所のフォント" />
                 <hbox>
-                  <menulist id="font-list" flex="1">
+                  <menulist id="font" flex="1">
                     <menupopup>
                       <menuitem label="IPAexMincho" value="IPAexMincho" />
                       <menuseparator />
