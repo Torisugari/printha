@@ -656,9 +656,9 @@ void printPage(FT_Face aFTSelectedFont, cairo_surface_t* aCS,
            const std::string& aArgv, const textformat_t& aSettings) {
 
   if (aSettings.preview) {
-    static const char kBuildDirImageFile[] =
+    static const char kDataDirImageFile[] =
       PRINTHA_DATADIR "/resources/bg.png";
-    setBackground(aCS, kBuildDirImageFile);
+    setBackground(aCS, kDataDirImageFile);
   }
   // See: <http://www.post.japanpost.jp/zipcode/zipmanual/p05.html>
   // unit: milimeter
@@ -811,28 +811,28 @@ inline bool fileCopy(const char* aSource, const char* aDest) {
 //#include <sys/stat.h>
 int main (int argc, char* argv[]) {
 
-  static const char kBuildDirConfigFile[] =
+  static const char kDataDirConfigFile[] =
     PRINTHA_DATADIR "/settings/config.txt"; 
-  static const char kBuildDirSendFromFile[] =
+  static const char kDataDirSendFromFile[] =
     PRINTHA_DATADIR "/settings/sendfrom.txt";
-  static const char kBuildDirSendToFile[] =
+  static const char kDataDirSendToFile[] =
     PRINTHA_DATADIR "/settings/sendto.txt";
 
 #ifdef PRINTHA_USE_DEFAULT_FONT
-  static const FcChar8 kBuildDirFontFile[] =
+  static const FcChar8 kDataDirFontFile[] =
     PRINTHA_DATADIR "/resources/font/ipaexm.ttf";
 #endif
 
 #ifdef PRINTHA_USE_DEFAULT_ZIPCODE_FONT
-  static const FcChar8 kBuildDirOCRBFontFile[] =
+  static const FcChar8 kDataDirZipcodeFontFile[] =
     PRINTHA_DATADIR "/resources/zipfont/OCRB_aizu_1_1.ttf";
 #endif
   textformat_t settings;
-  bool isBuildDirConfig =  settings::read(kBuildDirConfigFile, settings);
+  bool isBuildDirConfig =  settings::read(kDataDirConfigFile, settings);
   if (isBuildDirConfig) {
 #ifdef DEBUG
     fprintf(stderr, "Successfully loaded config file:%s\n",
-                    kBuildDirConfigFile);
+                    kDataDirConfigFile);
 #  ifdef PRINTHA_USE_SRCDIR_FILES
     settings::write(PRINTHA_DATADIR "/src/printha_init.cpp", settings,
                     settings::kWriteFormatCSRC);
@@ -840,7 +840,7 @@ int main (int argc, char* argv[]) {
 #endif
   }
   else {
-    fprintf(stderr, "Missing file:%s\n", kBuildDirConfigFile);
+    fprintf(stderr, "Missing file:%s\n", kDataDirConfigFile);
   }
 
   char fileNameBuffer[FILENAME_MAX];
@@ -887,19 +887,19 @@ int main (int argc, char* argv[]) {
     }
     else if ((0 == strcasecmp("-i", argv[i])) ||
         (0 == strcasecmp("--init", argv[i]))) {
-      settings::read(kBuildDirConfigFile, settings);
+      settings::read(kDataDirConfigFile, settings);
 
       realpath("sendfrom.txt", fileNameBuffer);
       settings.sendfrompath = fileNameBuffer;
       if (!fileExists(fileNameBuffer)) {
         fprintf(stderr, "Creating file:%s\n", fileNameBuffer);
-        fileCopy(kBuildDirSendFromFile, fileNameBuffer);
+        fileCopy(kDataDirSendFromFile, fileNameBuffer);
       }
 
       realpath("sendto.txt", fileNameBuffer);
       if (!fileExists(fileNameBuffer)) {
         fprintf(stderr, "Creating file:%s\n", fileNameBuffer);
-        fileCopy(kBuildDirSendToFile, fileNameBuffer);
+        fileCopy(kDataDirSendToFile, fileNameBuffer);
       }
 
       fprintf(stderr, "Saving settings at:%s\n", userDirConfig.c_str());
@@ -1052,10 +1052,10 @@ int main (int argc, char* argv[]) {
 
   FcInit();
 #ifdef PRINTHA_USE_DEFAULT_FONT
-  FcConfigAppFontAddFile(nullptr, kBuildDirFontFile);
+  FcConfigAppFontAddFile(nullptr, kDataDirFontFile);
 #endif
 #ifdef PRINTHA_USE_DEFAULT_ZIPCODE_FONT
-  FcConfigAppFontAddFile(nullptr, kBuildDirOCRBFontFile);
+  FcConfigAppFontAddFile(nullptr, kDataDirZipcodeFontFile);
 #endif
 
   int fontindex = 0;
