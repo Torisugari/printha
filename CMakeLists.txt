@@ -2,6 +2,7 @@ project(printha)
 cmake_minimum_required(VERSION 2.8)
 
 include(FindPkgConfig)
+include(GNUInstallDirs)
 
 # cairo
 pkg_check_modules(CAIRO cairo)
@@ -49,13 +50,11 @@ set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 
 # Make sure to link to Harfbuzz's since it may be installed locally atm.
-set(CMAKE_INSTALL_RPATH "${HARFBUZZ_LIBRARY_DIRS}")
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
-
-# Make it possible to overwrite these settings.
-set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
-set(INSTALL_DATA_DIR share/printha CACHE PATH
-    "Installation directory for data files")
+option(USE_LOCAL_HARFBUZZ "Use local harfbuzz instead of distro's" OFF)
+if(USE_LOCAL_HARFBUZZ)
+  set(CMAKE_INSTALL_RPATH "${HARFBUZZ_LIBRARY_DIRS}")
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+endif(USE_LOCAL_HARFBUZZ)
 
 option(USE_SRCDIR_FILES
        "Use files in source dir instead of those in installed dir" OFF)
@@ -68,16 +67,17 @@ if(USE_SRCDIR_FILES)
   set(PRINTHA_DATADIR "${PROJECT_SOURCE_DIR}")
   add_definitions(-DPRINTHA_USE_SRCDIR_FILES=1)
 else(USE_SRCDIR_FILES)
-  set(PRINTHA_BINDIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_BIN_DIR}")
-  set(PRINTHA_DATADIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}")
-  install(DIRECTORY settings DESTINATION ${INSTALL_DATA_DIR})
-  install(DIRECTORY resources DESTINATION ${INSTALL_DATA_DIR})
-if(ENABLE_GUI)
-  install(DIRECTORY gui DESTINATION ${INSTALL_DATA_DIR})
-  install(FILES ${PROJECT_BINARY_DIR}/printha.gui
-          DESTINATION "${INSTALL_DATA_DIR}"
-          COMPONENT script)
-endif(ENABLE_GUI)
+  set(PRINTHA_BINDIR "${CMAKE_INSTALL_FULL_BINDIR}")
+  set(PRINTHA_DATADIR "${CMAKE_INSTALL_FULL_DATADIR}/printha")
+  set(PRINTHA_REL_DATADIR "${CMAKE_INSTALL_DATADIR}/printha")
+  install(DIRECTORY settings DESTINATION "${PRINTHA_REL_DATADIR}")
+  install(DIRECTORY resources DESTINATION "${PRINTHA_REL_DATADIR}")
+  if(ENABLE_GUI)
+    install(DIRECTORY gui DESTINATION ${PRINTHA_REL_DATADIR})
+    install(FILES ${PROJECT_BINARY_DIR}/printha.gui
+            DESTINATION "${PRINTHA_REL_DATADIR}"
+            COMPONENT script)
+  endif(ENABLE_GUI)
 endif(USE_SRCDIR_FILES)
 
 add_definitions(-DPRINTHA_DATADIR=\"${PRINTHA_DATADIR}\")
@@ -91,5 +91,5 @@ configure_file ("${PROJECT_SOURCE_DIR}/src/printha.gui.in"
                 printha.gui)
 
 add_executable(printha src/printha_settings.cpp src/printha.cpp)
-install(TARGETS printha RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin)
+install(TARGETS printha RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin)
 
