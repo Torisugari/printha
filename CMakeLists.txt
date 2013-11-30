@@ -59,6 +59,16 @@ endif(USE_LOCAL_HARFBUZZ)
 option(USE_SRCDIR_FILES
        "Use files in source dir instead of those in installed dir" OFF)
 
+option(USE_DEFAULT_FONT "Install runtime font at DATADIR" ON)
+if(USE_DEFAULT_FONT)
+  add_definitions(-DPRINTHA_USE_DEFAULT_FONT=1)
+endif(USE_DEFAULT_FONT)
+
+option(USE_DEFAULT_ZIPCODE_FONT "Install runtime font at DATADIR" ON)
+if(USE_DEFAULT_ZIPCODE_FONT)
+  add_definitions(-DPRINTHA_USE_DEFAULT_ZIPCODE_FONT=1)
+endif(USE_DEFAULT_ZIPCODE_FONT)
+
 # XXX There's no smart way to check whether Firefox or XULRunner is installed.
 option(ENABLE_GUI "XULRunner application" ON)
 
@@ -71,7 +81,13 @@ else(USE_SRCDIR_FILES)
   set(PRINTHA_DATADIR "${CMAKE_INSTALL_FULL_DATADIR}/printha")
   set(PRINTHA_REL_DATADIR "${CMAKE_INSTALL_DATADIR}/printha")
   install(DIRECTORY settings DESTINATION "${PRINTHA_REL_DATADIR}")
-  install(DIRECTORY resources DESTINATION "${PRINTHA_REL_DATADIR}")
+  install(FILES resources/bg.png DESTINATION "${PRINTHA_REL_DATADIR}/resouces")
+  if(USE_DEFAULT_FONT)
+    install(DIRECTORY resources/font DESTINATION "${PRINTHA_REL_DATADIR}/resouces")
+  endif(USE_DEFAULT_FONT)
+  if(USE_DEFAULT_ZIPCODE_FONT)
+    install(DIRECTORY resources/zipfont DESTINATION "${PRINTHA_REL_DATADIR}/resouces")
+  endif(USE_DEFAULT_ZIPCODE_FONT)
   if(ENABLE_GUI)
     install(DIRECTORY gui DESTINATION ${PRINTHA_REL_DATADIR})
     install(FILES ${PROJECT_BINARY_DIR}/printha.gui

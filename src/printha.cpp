@@ -817,11 +817,16 @@ int main (int argc, char* argv[]) {
     PRINTHA_DATADIR "/settings/sendfrom.txt";
   static const char kBuildDirSendToFile[] =
     PRINTHA_DATADIR "/settings/sendto.txt";
+
+#ifdef PRINTHA_USE_DEFAULT_ZIPCODE_FONT
   static const FcChar8 kBuildDirFontFile[] =
     PRINTHA_DATADIR "/resources/ipaexm00201/ipaexm.ttf";
+#endif
+
+#ifdef PRINTHA_USE_DEFAULT_ZIPCODE_FONT
   static const FcChar8 kBuildDirOCRBFontFile[] =
     PRINTHA_DATADIR "/resources/OCRB_aizu_1_1/OCRB_aizu_1_1.ttf";
-
+#endif
   textformat_t settings;
   bool isBuildDirConfig =  settings::read(kBuildDirConfigFile, settings);
   if (isBuildDirConfig) {
@@ -1046,8 +1051,12 @@ int main (int argc, char* argv[]) {
   FT_Face ftSelectedFont;
 
   FcInit();
+#ifdef PRINTHA_USE_DEFAULT_FONT
   FcConfigAppFontAddFile(nullptr, kBuildDirFontFile);
+#endif
+#ifdef PRINTHA_USE_DEFAULT_FONT
   FcConfigAppFontAddFile(nullptr, kBuildDirOCRBFontFile);
+#endif
 
   int fontindex = 0;
   const char* fontpath = nullptr;
