@@ -818,7 +818,7 @@ int main (int argc, char* argv[]) {
   static const char kBuildDirSendToFile[] =
     PRINTHA_DATADIR "/settings/sendto.txt";
 
-#ifdef PRINTHA_USE_DEFAULT_ZIPCODE_FONT
+#ifdef PRINTHA_USE_DEFAULT_FONT
   static const FcChar8 kBuildDirFontFile[] =
     PRINTHA_DATADIR "/resources/ipaexm00201/ipaexm.ttf";
 #endif
@@ -1054,7 +1054,7 @@ int main (int argc, char* argv[]) {
 #ifdef PRINTHA_USE_DEFAULT_FONT
   FcConfigAppFontAddFile(nullptr, kBuildDirFontFile);
 #endif
-#ifdef PRINTHA_USE_DEFAULT_FONT
+#ifdef PRINTHA_USE_DEFAULT_ZIPCODE_FONT
   FcConfigAppFontAddFile(nullptr, kBuildDirOCRBFontFile);
 #endif
 
