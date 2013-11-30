@@ -26,6 +26,7 @@ THE SOFTWARE.
 <bindings
   xmlns="http://www.mozilla.org/xbl"
   xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:html="http://www.w3.org/1999/xhtml"
   xmlns:xbl="http://www.mozilla.org/xbl">
   <binding id="rectbox">
     <content pack="center" orient="vertical">
@@ -52,7 +53,7 @@ THE SOFTWARE.
   <xul:vbox>
     <xul:spacer flex="1" />
     <xul:textbox anonid="increment" type="number"
-                 min="1" max="99" size="2" value="1"/>
+                 min="1" max="99" size="2" value="5"/>
     <xul:spacer flex="1" />
   </xul:vbox>
   <xul:vbox>
@@ -80,6 +81,12 @@ THE SOFTWARE.
     <xul:button label="↕-" oncommand="this.parentNode.parentNode.parentNode.vNarrower()"/>
   </xul:vbox>
 </xul:hbox>
+
+<xul:hbox>
+<xul:spacer flex="1"/>
+<html:canvas anonid="canvas" width="100" height="148"/>
+<xul:spacer flex="1"/>
+</xul:hbox>
     </content>
 
     <implementation>
@@ -87,6 +94,7 @@ THE SOFTWARE.
       <field name="mSY">null</field>
       <field name="mEX">null</field>
       <field name="mEY">null</field>
+      <field name="mCanvas">null</field>
       <field name="mIncrement">null</field>
       <field name="_isInit">false</field>
       <property name="value">
@@ -104,6 +112,7 @@ THE SOFTWARE.
           this.sy.value = array[1];
           this.ex.value = array[2];
           this.ey.value = array[3];
+          this.draw();
           return val;
           ]]>
         </setter>
@@ -140,6 +149,14 @@ THE SOFTWARE.
           return this.mEY;
         </getter>
       </property>
+      <property name="canvas">
+        <getter>
+          if (!this.mCanvas) {
+            this.mCanvas = document.getAnonymousElementByAttribute(this, "anonid", "canvas");
+          }
+          return this.mCanvas;
+        </getter>
+      </property>
       <property name="ctrlInc">
         <getter>
           if (!this.mIncrement) {
@@ -152,16 +169,56 @@ THE SOFTWARE.
         this.value = this.hasAttribute("value")? this.getAttribute("value") : "0 0 0 0";
         this._isInit = true;
       </constructor>
+
+
+      <method name="draw">
+        <body>
+<![CDATA[{
+    const ratio = 25.4/72.0;
+    var ctx = this.canvas.getContext("2d");
+    ctx.lineWidth = 1;
+    ctx.fillStyle = "black";
+
+    var sx = this.sx.valueNumber * ratio;
+    var sy = this.sy.valueNumber * ratio;
+    var ex = this.ex.valueNumber * ratio;
+    var ey = this.ey.valueNumber * ratio;
+
+    var w = ex - sx;
+    var h = ey - sy;
+
+    ctx.clearRect(0, 0, 100, 148);
+    // XXX evil dependency
+    if (gPrinthaSettings.image) {
+      ctx.drawImage(gPrinthaSettings.image, 0, 0, 100, 148);
+    }
+    else {
+      ctx.strokeRect(0, 0, 100, 148);
+    }
+    ctx.strokeRect(sx, sy, w, h);
+}]]>
+        </body>
+      </method>
       <method name="goUp">
         <body>
 <![CDATA[{
   var sy = this.sy.valueNumber - this.ctrlInc;
   var ey = this.ey.valueNumber - this.ctrlInc;
+  var symin = Number(this.sy.min);
 
-  if (Number(this.sy.min) <= sy && Number(this.ey.min) <= ey) {
-    this.sy.value = sy;
-    this.ey.value = ey;
+  if (sy < symin) {
+    ey = symin + ey - sy;
+    sy = symin;
   }
+
+  if (ey < sy) {
+    ey = sy;
+  }
+
+  this.sy.value = sy;
+  this.ey.value = ey;
+
+  this.draw();
 }]]>
         </body>
       </method>
@@ -170,11 +227,21 @@ THE SOFTWARE.
 <![CDATA[{
   var sy = this.sy.valueNumber + this.ctrlInc;
   var ey = this.ey.valueNumber + this.ctrlInc;
+  var eymax = Number(this.ey.max);
 
-  if (Number(this.sy.max) >= sy && Number(this.ey.max) >= ey) {
-    this.sy.value = sy;
-    this.ey.value = ey;
+  if (eymax < ey) {
+    sy = eymax - ey + sy;
+    ey = eymax;
   }
+
+  if (ey < sy) {
+    sy = ey;
+  }
+
+  this.sy.value = sy;
+  this.ey.value = ey;
+
+  this.draw();
 }]]>
         </body>
       </method>
@@ -183,11 +250,21 @@ THE SOFTWARE.
 <![CDATA[{
   var sx = this.sx.valueNumber - this.ctrlInc;
   var ex = this.ex.valueNumber - this.ctrlInc;
+  var sxmin = Number(this.sx.min);
 
-  if (Number(this.sx.min) <= sx && Number(this.ex.min) <= ex) {
-    this.sx.value = sx;
-    this.ex.value = ex;
+  if (sx < sxmin) {
+    ex = sxmin + ex - sx;
+    sx = sxmin;
   }
+
+  if (ex < sx) {
+    ex = sx;
+  }
+
+  this.sx.value = sx;
+  this.ex.value = ex;
+
+  this.draw();
 }]]>
         </body>
       </method>
@@ -196,63 +273,129 @@ THE SOFTWARE.
 <![CDATA[{
   var sx = this.sx.valueNumber + this.ctrlInc;
   var ex = this.ex.valueNumber + this.ctrlInc;
+  var exmax = Number(this.ex.max);
 
-  if (Number(this.sx.max) >= sx && Number(this.ex.max) >= ex) {
-    this.sx.value = sx;
-    this.ex.value = ex;
+  if (exmax < ex) {
+    sx = exmax - ex + sx;
+    ex = exmax;
   }
+
+  if (ex < sx) {
+    sx = ex;
+  }
+
+  this.sx.value = sx;
+  this.ex.value = ex;
+
+  this.draw();
 }]]>
         </body>
       </method>
       <method name="hNarrower">
         <body>
 <![CDATA[{
-  var sx = this.sx.valueNumber + this.ctrlInc;
-  var ex = this.ex.valueNumber - this.ctrlInc;
+  var increment = this.ctrlInc / 2.0;
 
-  if (sx <= ex) {
-    this.sx.value = sx;
-    this.ex.value = ex;
+  var sx = this.sx.valueNumber;
+  var ex = this.ex.valueNumber;
+
+  if (sx == ex) {
+    return;
   }
+
+  sx += increment;
+  ex -= increment;
+
+  if (ex < sx) {
+    sx = (sx + ex) / 2.0;
+    ex = sx;
+  }
+
+  this.sx.value = sx;
+  this.ex.value = ex;
+
+  this.draw();
 }]]>
         </body>
       </method>
       <method name="vNarrower">
         <body>
 <![CDATA[{
-  var sy = this.sy.valueNumber + this.ctrlInc;
-  var ey = this.ey.valueNumber - this.ctrlInc;
+  var increment = this.ctrlInc / 2.0;
 
-  if (sy <= ey) {
-    this.sy.value = sy;
-    this.ey.value = ey;
+  var sy = this.sy.valueNumber;
+  var ey = this.ey.valueNumber;
+
+  if (sy == ey) {
+    return;
   }
+
+  sy += increment;
+  ey -= increment;
+
+  if (ey < sy) {
+    sy = (sy + ey) / 2.0;
+    ey = sy;
+  }
+
+  this.sy.value = sy;
+  this.ey.value = ey;
+
+  this.draw();
 }]]>
         </body>
       </method>
       <method name="vWider">
         <body>
 <![CDATA[{
-  var sy = this.sy.valueNumber - this.ctrlInc;
-  var ey = this.ey.valueNumber + this.ctrlInc;
+  var increment = this.ctrlInc / 2.0;
 
-  if (Number(this.sy.min) <= sy && Number(this.ey.max) >= ey) {
-    this.sy.value = sy;
-    this.ey.value = ey;
+  var sy = this.sy.valueNumber - increment;
+  var ey = this.ey.valueNumber + increment;
+  var symin = Number(this.sy.min);
+  var eymax = Number(this.ey.max);
+
+  var h = ey - sy;
+  var maxh = eymax - symin;
+  if (maxh < h) {
+    h = maxh;
   }
+
+  if (sy < symin) {
+    sy = symin;
+    ey = symin + h;
+  }
+
+  if (eymax < ey) {
+    sy = eymax - h;
+    ey = eymax;
+  }
+
+  this.sy.value = sy;
+  this.ey.value = ey;
+  this.draw();
 }]]>
         </body>
       </method>
       <method name="hWider">
         <body>
 <![CDATA[{
-  var sx = this.sx.valueNumber - this.ctrlInc;
-  var ex = this.ex.valueNumber + this.ctrlInc;
+  var increment = this.ctrlInc / 2.0;
 
-  if (Number(this.sx.min) <= sx && Number(this.ex.max) >= ex) {
+  var sx = this.sx.valueNumber - increment;
+  var ex = this.ex.valueNumber + increment;
+  var sxmin = Number(this.sx.min);
+
+  if (sx < sxmin) {
+    ex += sxmin - sx;
+    sx = sxmin;
+  }
+
+  if (ex<= Number(this.ex.max)) {
     this.sx.value = sx;
     this.ex.value = ex;
   }
+  this.draw();
 }]]>
         </body>
       </method>
@@ -282,6 +425,7 @@ THE SOFTWARE.
       break;
     default:
   }
+  this.draw();
 }]]>
         </body>
       </method>

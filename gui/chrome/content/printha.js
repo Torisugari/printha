@@ -25,17 +25,17 @@ Components.utils.import("resource://gre/modules/NetUtil.jsm");
 Components.utils.import("resource://printha/csvparser.js");
 
 var gPrinthaSettings = {
-  set addressData(aData) {
-    this._addressData = aData;
+  set sendtoData(aData) {
+    this._sendtoData = aData;
     var i;
-    if (this._addressData.length > 0 && this._addressData[0].length > 3) {
-      document.getElementById("csv.sendto.fname").value = this._addressData[0][0];
-      document.getElementById("csv.sendto.sname").value = this._addressData[0][1];
-      document.getElementById("csv.sendto.zipcode").value = this._addressData[0][2];
-      document.getElementById("csv.sendto.address").value = this._addressData[0][3];
-      if (this._addressData[0].length > 4 && this._addressData[0][4]) {
+    if (this._sendtoData.length > 0 && this._sendtoData[0].length > 3) {
+      document.getElementById("csv.sendto.fname").value = this._sendtoData[0][0];
+      document.getElementById("csv.sendto.sname").value = this._sendtoData[0][1];
+      document.getElementById("csv.sendto.zipcode").value = this._sendtoData[0][2];
+      document.getElementById("csv.sendto.address").value = this._sendtoData[0][3];
+      if (this._sendtoData[0].length > 4 && this._sendtoData[0][4]) {
         document.getElementById("csv.sendto.address").value += 
-          "\n" + this._addressData[0][4];
+          "\n" + this._sendtoData[0][4];
       }
     }
     else {
@@ -47,8 +47,8 @@ var gPrinthaSettings = {
 
     for (i = 0; i < 6; i++) {
       document.getElementById("csv.sendto.extra[" + i + "]").value = 
-       ((i + 5) < this._addressData[0].length)?
-         this._addressData[0][i + 5] : "";
+       ((i + 5) < this._sendtoData[0].length)?
+         this._sendtoData[0][i + 5] : "";
     }
   },
 
@@ -56,17 +56,17 @@ var gPrinthaSettings = {
     return document.getElementById("direct-input").selected;
   },
 
-  get addressData() {
+  get sendtoData() {
     if (this.isDirectInput) {
       return this.directInputData;
     }
 
-    var length = this._addressData.length;
+    var length = this._sendtoData.length;
     var hono = this.hono;
     var extra = this.isExtraEnabled;
-    var data = this.formatLine(this._addressData[0], hono, extra);
+    var data = this.formatLine(this._sendtoData[0], hono, extra);
     for (var i = 1; i < length; i++) {
-      var temp = this.formatLine(this._addressData[i], hono, extra);
+      var temp = this.formatLine(this._sendtoData[i], hono, extra);
       if (temp) {
         data += "|" + temp;
       }
@@ -86,12 +86,12 @@ var gPrinthaSettings = {
     return data;
   },
 
-  get firstAddressData() {
+  get firstSendtoData() {
     if (this.isDirectInput) {
       return this.directInputData;
     }
 
-    return this.formatLine(this._addressData[0], this.hono, this.isExtraEnabled);
+    return this.formatLine(this._sendtoData[0], this.hono, this.isExtraEnabled);
   },
 
   set sendfromData(aData) {
@@ -303,7 +303,8 @@ var gPrinthaSettings = {
   svgpath: "",
   isPreview: false,
   binpath: "",
-  _addressData: [["","","",""]]
+  image: null,
+  _sendtoData: [["","","",""]]
 };
 
 function toggleExtra (aHidden) {
@@ -316,7 +317,7 @@ function toggleExtra (aHidden) {
   sendfromStyle.hidden = aHidden;
   sendtoStyle.hidden = aHidden;
 
-  if (aHidden && (sendfromStyle.selected || styleSendto.selected)) {
+  if (aHidden && (sendfromStyle.selected || sendtoStyle.selected)) {
     sendfromStyle.parentNode.selectedIndex = 0;
   }
 
@@ -354,7 +355,7 @@ function selectCSV() {
     var data = NetUtil.readInputStreamToString(aInputStream,
                                                aInputStream.available(),
                                                kOption);
-    gPrinthaSettings.addressData = parseCSV(data);
+    gPrinthaSettings.sendtoData = parseCSV(data);
   }
 
   NetUtil.asyncFetch(fp.file, callback);
@@ -508,22 +509,41 @@ var previewObserver = {
       if (browser.currentURI.spec != "about:blank") {
         browser.loadURI("about:blank", null, null);
       }
+      gPrinthaSettings.image = null;
     }
     var io = Components.classes['@mozilla.org/network/io-service;1']
                        .getService(Components.interfaces.nsIIOService);
     var file = Components.classes["@mozilla.org/file/local;1"]
                          .createInstance(Components.interfaces.nsILocalFile);
     file.initWithPath(gPrinthaSettings.svgpath);
+
+    if (!file.exists()) {
+      if (browser.currentURI.spec != "about:blank") {
+        browser.loadURI("about:blank", null, null);
+      }
+      gPrinthaSettings.image = null;
+    }
+
     var fileURI = io.newFileURI(file);
     if (fileURI.equals(browser.currentURI)) {
-      const flag =
-        Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY |
-        Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE;
       browser.reload();
     }
     else {
       browser.loadURI(fileURI.spec);
     }
+
+    if (!gPrinthaSettings.image) {
+      gPrinthaSettings.image = new Image();
+      gPrinthaSettings.image.onload =
+        function (aEvent) {
+          var rects = document.getElementsByTagName("rectbox");
+          for (var i = 0; i < rects.length; i++) {
+            rects[i].draw();
+          }
+        };
+    }
+
+    gPrinthaSettings.image.src = fileURI.spec + "?t=" + (new Date()).getTime();
   },
 
   QueryInterface: function(aIID) {
@@ -546,10 +566,10 @@ function print3(aStatus) {
     if (gPrinthaSettings.isPreview) {
       args.push("--preview");
       args.push("--svg");
-      args.push(gPrinthaSettings.firstAddressData);
+      args.push(gPrinthaSettings.firstSendtoData);
     }
     else{
-      args.push(gPrinthaSettings.addressData);
+      args.push(gPrinthaSettings.sendtoData);
     }
     process.runwAsync(args, args.length, previewObserver, false);
   }
