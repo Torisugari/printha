@@ -820,12 +820,12 @@ int main (int argc, char* argv[]) {
 
 #ifdef PRINTHA_USE_DEFAULT_FONT
   static const FcChar8 kBuildDirFontFile[] =
-    PRINTHA_DATADIR "/resources/ipaexm00201/ipaexm.ttf";
+    PRINTHA_DATADIR "/resources/font/ipaexm.ttf";
 #endif
 
 #ifdef PRINTHA_USE_DEFAULT_ZIPCODE_FONT
   static const FcChar8 kBuildDirOCRBFontFile[] =
-    PRINTHA_DATADIR "/resources/OCRB_aizu_1_1/OCRB_aizu_1_1.ttf";
+    PRINTHA_DATADIR "/resources/zipfont/OCRB_aizu_1_1.ttf";
 #endif
   textformat_t settings;
   bool isBuildDirConfig =  settings::read(kBuildDirConfigFile, settings);
