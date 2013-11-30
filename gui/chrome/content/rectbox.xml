@@ -169,8 +169,6 @@ THE SOFTWARE.
         this.value = this.hasAttribute("value")? this.getAttribute("value") : "0 0 0 0";
         this._isInit = true;
       </constructor>
-
-
       <method name="draw">
         <body>
 <![CDATA[{
@@ -373,6 +371,7 @@ THE SOFTWARE.
 
   this.sy.value = sy;
   this.ey.value = ey;
+
   this.draw();
 }]]>
         </body>
@@ -385,16 +384,28 @@ THE SOFTWARE.
   var sx = this.sx.valueNumber - increment;
   var ex = this.ex.valueNumber + increment;
   var sxmin = Number(this.sx.min);
+  var exmax = Number(this.ex.max);
+
+  var w = ex - sx;
+  var maxw = exmax - sxmin;
+
+  if (maxw < w) {
+    w = maxw;
+  }
 
   if (sx < sxmin) {
-    ex += sxmin - sx;
     sx = sxmin;
+    ex = sxmin + w;
   }
 
-  if (ex<= Number(this.ex.max)) {
-    this.sx.value = sx;
-    this.ex.value = ex;
+  if (exmax < ex) {
+    sx = exmax - w;
+    ex = exmax;
   }
+
+  this.sx.value = sx;
+  this.ex.value = ex;
+
   this.draw();
 }]]>
         </body>
