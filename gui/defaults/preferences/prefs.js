@@ -1,1 +1,1 @@
-pref("toolkit.defaultChromeURI", "chrome://printha/content/");pref("toolkit.singletonWindowType", "window:printha");
+pref("toolkit.defaultChromeURI", "chrome://printha/content/");pref("toolkit.singletonWindowType", "window:printha");// See https://bugzilla.mozilla.org/show_bug.cgi?id=892851pref("accessibility.typeaheadfind", false);pref("accessibility.typeaheadfind.timeout", 5000);pref("accessibility.typeaheadfind.linksonly", false);pref("accessibility.typeaheadfind.flashBar", 1);
