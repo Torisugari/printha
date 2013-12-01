@@ -125,10 +125,12 @@ set(CPACK_GENERATOR "RPM" CACHE STRING "DEB or RPM")
 
 # DEB
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-set(CPACK_DEBIAN_PACKAGE_SECTION "office")
+set(CPACK_DEBIAN_PACKAGE_SECTION "text")
 set(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 set(CPACK_DEBIAN_PACKAGE_DEPENDS
-      "libcairo2 (>= 1.8), libfreetype6 (>= 2.4)")
+    "libcairo2 (>= 1.8), libfreetype6, libharfbuzz0 (>= 0.9), fontconfig")
+set(CPACK_DEBIAN_PACKAGE_RECOMMENDS
+    "firefox, iceweasel, xulrunner")
 
 set(${VERSION} CPACK_DEBIAN_PACKAGE_VERSION)
 
