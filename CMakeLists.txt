@@ -1,8 +1,10 @@
 project(printha)
+set(VERSION 1.0.0)
 cmake_minimum_required(VERSION 2.8)
 
 include(FindPkgConfig)
 include(GNUInstallDirs)
+include(InstallRequiredSystemLibraries)
 
 # cairo
 pkg_check_modules(CAIRO cairo)
@@ -96,7 +98,7 @@ else(USE_SRCDIR_FILES)
 
   if(ENABLE_GUI)
     install(DIRECTORY gui DESTINATION ${PRINTHA_REL_DATADIR})
-    install(FILES ${PROJECT_BINARY_DIR}/printha.gui
+    install(PROGRAMS ${PROJECT_BINARY_DIR}/printha.gui
             DESTINATION "${PRINTHA_REL_DATADIR}"
             COMPONENT script)
   endif(ENABLE_GUI)
@@ -118,3 +120,32 @@ install(TARGETS printha
         DESTINATION "${CMAKE_INSTALL_BINDIR}"
         COMPONENT bin)
 
+
+set(CPACK_GENERATOR "RPM" CACHE STRING "DEB or RPM")
+
+# DEB
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+set(CPACK_DEBIAN_PACKAGE_SECTION "office")
+set(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+set(CPACK_DEBIAN_PACKAGE_DEPENDS
+      "libcairo2 (>= 1.8), libfreetype6 (>= 2.4)")
+
+set(${VERSION} CPACK_DEBIAN_PACKAGE_VERSION)
+
+# CPACK
+set(CPACK_SET_DESTDIR "on")
+set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/${CPACK_PACKAGE_NAME}")
+
+set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}" CACHE STRING
+    "Package name")
+set(CPACK_PACKAGE_CONTACT "Your Name <username@hostname>" CACHE STRING
+    "Package maintainer")
+
+set(CPACK_PACKAGE_DESCRIPTION
+"This software helps you to print name/address on Japanese postcards (Hagaki).")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
+"This software helps you to print name/address on Japanese postcards (Hagaki).")
+
+set(CPACK_COMPONENTS_ALL Libraries ApplicationData)
+
+include(CPack)
