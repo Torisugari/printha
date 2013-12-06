@@ -23,6 +23,12 @@
 #define __PRINTHA_HEADER__
 #include <string>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
+#include <cairo.h>
+#include <harfbuzz/hb.h>
+
 namespace printha {
 
 struct point_t {
@@ -50,14 +56,6 @@ struct rect_t {
     return mEnd.mY - mStart.mY;
   }
   point_t mStart, mEnd;
-};
-
-typedef rect_t ziprect_t[7];
-
-enum FrameType {
-  NO_FRAME,
-  DRAW_SENDTO,
-  DRAW_SENDFROM
 };
 
 struct frameformat_t {
@@ -92,14 +90,25 @@ struct textformat_t {
   personformat_t sendfrom;
 };
 
-namespace settings {
-  enum WriteFormat {
-    kWriteFormatScan,
-    kWriteFormatCSRC
-  };
-  bool read(const char* aFileName, textformat_t& aSettings);
-  void write(const char* aFileName, const textformat_t& aSettings,
-             WriteFormat aWriteFormat = kWriteFormatScan);
-}
+enum mode {
+  kPDF,
+  kSVG,
+  kPS
+};
+
+cairo_surface_t* hagaki_surface_create(const char* aFileName, mode aMode);
+
+void printPage(FT_Face aFont, cairo_surface_t* aCS,
+               const std::string& aString, textformat_t& aSettings);
+
+void printLines(FT_Face aFont, cairo_surface_t* aCS,
+                const std::string& aString, const frameformat_t& aFrame);
+
+double printString(FT_Face aFTSelectedFont, cairo_surface_t* aCS,
+                   const char* aString, const rect_t& aRect,
+                   double& aMaxFontSize, double aWhiteSpace,
+                   bool aStretch, bool aBottom = false, bool aRed = false,
+                   hb_direction_t aDirection = HB_DIRECTION_TTB);
+
 }
 #endif

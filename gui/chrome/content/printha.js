@@ -269,7 +269,6 @@ var gPrinthaSettings = {
     "sendto.extra[4].bottom": true,
     "sendto.extra[5].stretch": true,
     "sendto.extra[5].bottom": true,
-
     "sendfrom.extra[0].stretch": true,
     "sendfrom.extra[0].bottom": true,
     "sendfrom.extra[1].stretch": true,
@@ -537,6 +536,8 @@ var previewObserver = {
 
     if (!gPrinthaSettings.image) {
       gPrinthaSettings.image = new Image();
+      gPrinthaSettings.image.width = 100;
+      gPrinthaSettings.image.height = 148;
       gPrinthaSettings.image.onload =
         function (aEvent) {
           var rects = document.getElementsByTagName("rectbox");

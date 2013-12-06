@@ -45,7 +45,6 @@
 #include <cmath>
 
 #include "printha.h"
-using namespace printha;
 
 #define HAGAKI_WIDTH_MM   100.0                          // 100mm
 #define HAGAKI_HEIGHT_MM  148.0                          // 148mm
@@ -61,6 +60,16 @@ using namespace printha;
 
 #define ZIPRECT_TICK_LINE_WIDTH (0.7/2)                  // 0.6mm - 0.8mm (JIS)
 #define ZIPRECT_THIN_LINE_WIDTH (0.4/2)                  // 0.3mm - 0.5mm (JIS)
+
+namespace printha {
+
+enum FrameType {
+  NO_FRAME,
+  DRAW_SENDTO,
+  DRAW_SENDFROM
+};
+
+typedef rect_t ziprect_t[7];
 
 void setBackground(cairo_surface_t* aCS, const char* aFileName) {
   cairo_surface_t* bg =
@@ -255,8 +264,8 @@ reverseCairoCluster(cairo_text_cluster_t aBuff[], uint32_t aLength) {
 double printString(FT_Face aFTSelectedFont, cairo_surface_t* aCS,
                    const char* aString, const rect_t& aRect,
                    double& aMaxFontSize, double aWhiteSpace,
-                   bool aStretch, bool aBottom = false, bool aRed = false,
-                   hb_direction_t aDirection = HB_DIRECTION_TTB) {
+                   bool aStretch, bool aBottom, bool aRed,
+                   hb_direction_t aDirection) {
   uint32_t strlength = strlen(aString);
   if (!strlength || aMaxFontSize <= 0) {
     return 0.;
@@ -653,7 +662,7 @@ void printLines(FT_Face aFTSelectedFont, cairo_surface_t* aCS,
 }
 
 void printPage(FT_Face aFTSelectedFont, cairo_surface_t* aCS,
-           const std::string& aArgv, const textformat_t& aSettings) {
+               const std::string& sendtoData, textformat_t& aSettings) {
 
   if (aSettings.preview) {
     static const char kDataDirImageFile[] =
@@ -686,8 +695,8 @@ void printPage(FT_Face aFTSelectedFont, cairo_surface_t* aCS,
   const int kExtraSize = sizeof(personformat_t::extra) / 
                            sizeof(personformat_t::extra[0]);
 
-  if (!aArgv.empty()) {
-    std::istringstream iss(aArgv);
+  if (!sendtoData.empty()) {
+    std::istringstream iss(sendtoData);
     if (iss && !iss.eof()) {
       std::getline(iss, token, aSettings.sendto.dlmt);
       printLines(aFTSelectedFont, aCS, token, aSettings.sendto.name);
@@ -796,327 +805,39 @@ cairo_status_t caStdout(void *aClosure,
   return CAIRO_STATUS_SUCCESS;
 }
 
-inline bool fileExists(const char* aFilePath) {
-  std::ifstream file(aFilePath);
-  return bool(file);
-}
+cairo_surface_t* hagaki_surface_create(const char* aFileName, mode aMode) {
+  static const double w = HAGAKI_WIDTH_PT;
+  static const double h = HAGAKI_HEIGHT_PT;
 
-inline bool fileCopy(const char* aSource, const char* aDest) {
-  std::ifstream input(aSource);
-  std::ofstream output(aDest);
-  output << input.rdbuf();
-  return (bool(output) && bool(input));
-}
-
-//#include <sys/stat.h>
-int main (int argc, char* argv[]) {
-
-  static const char kDataDirConfigFile[] =
-    PRINTHA_DATADIR "/settings/config.txt"; 
-  static const char kDataDirSendFromFile[] =
-    PRINTHA_DATADIR "/settings/sendfrom.txt";
-  static const char kDataDirSendToFile[] =
-    PRINTHA_DATADIR "/settings/sendto.txt";
-
-#ifdef PRINTHA_USE_DEFAULT_FONT
-  static const FcChar8 kDataDirFontFile[] =
-    PRINTHA_DATADIR "/resources/font/ipaexm.ttf";
-#endif
-
-#ifdef PRINTHA_USE_DEFAULT_ZIPCODE_FONT
-  static const FcChar8 kDataDirZipcodeFontFile[] =
-    PRINTHA_DATADIR "/resources/zipfont/OCRB_aizu_1_1.ttf";
-#endif
-  textformat_t settings;
-  bool isBuildDirConfig =  settings::read(kDataDirConfigFile, settings);
-  if (isBuildDirConfig) {
-#ifdef DEBUG
-    fprintf(stderr, "Successfully loaded config file:%s\n",
-                    kDataDirConfigFile);
-#  ifdef PRINTHA_USE_SRCDIR_FILES
-    settings::write(PRINTHA_DATADIR "/src/printha_init.cpp", settings,
-                    settings::kWriteFormatCSRC);
-#  endif
-#endif
-  }
-  else {
-    fprintf(stderr, "Missing file:%s\n", kDataDirConfigFile);
-  }
-
-  char fileNameBuffer[FILENAME_MAX];
-  // XXX realpath(...) may cause buffer overflow, I'm afraid.
-  realpath("printha.config.txt", fileNameBuffer);
-  std::string userDirConfig = fileNameBuffer;
-
-  settings::read(userDirConfig.c_str(), settings);
-
-  int32_t i;
-  std::string sendtoData;
-  bool skipPrint = false;
-  settings.preview = false;
-  enum PrintMode {
-    kPDF,
-    kSVG,
-    kPS
-  };
-  PrintMode printMode = kPDF;
-  for (i = 1; i < argc; i++) {
-    if ((0 == strcasecmp("-h", argv[i])) ||
-        (0 == strcasecmp("--help", argv[i]))) {
-      printf(
-"Usage: printha [OPTION...] [DATA]\n"
-"\n"
-"Options:\n"
-"  -h, --help            : Display this help document.\n"
-"  -i, --init            : Export clean <printha.config.txt> to the current \n"
-"                          working directory.\n"
-"                          If <sendfrom.txt> and <sendto.txt> are missing,\n"
-"                          they will also be created.\n"
-"  -s, --sendfrom <file> : Set the location of the text file which contains\n"
-"                          information about your name, zipcode, adress etc.\n"
-"                          And this command updates <printha.config.txt>.\n"
-"  -o, --output <file>   : Set PDF file location instead of stdout and\n"
-"                          upadates <printha.config.txt>.\n"
-"  --import <file>       : Temporarily import settings from <file> \n"
-"  --export <file>       : Export current settings to <file>.\n"
-"  --svg                 : Temporarily output data as a SVG file.\n"
-"  --ps                  : Temporarily output data as a PostScript file.\n"
-"  --preview             : Temporarily output data with background image.\n"
-      );
-      skipPrint = true;
-    }
-    else if ((0 == strcasecmp("-i", argv[i])) ||
-        (0 == strcasecmp("--init", argv[i]))) {
-      settings::read(kDataDirConfigFile, settings);
-
-      realpath("sendfrom.txt", fileNameBuffer);
-      settings.sendfrompath = fileNameBuffer;
-      if (!fileExists(fileNameBuffer)) {
-        fprintf(stderr, "Creating file:%s\n", fileNameBuffer);
-        fileCopy(kDataDirSendFromFile, fileNameBuffer);
-      }
-
-      realpath("sendto.txt", fileNameBuffer);
-      if (!fileExists(fileNameBuffer)) {
-        fprintf(stderr, "Creating file:%s\n", fileNameBuffer);
-        fileCopy(kDataDirSendToFile, fileNameBuffer);
-      }
-
-      fprintf(stderr, "Saving settings at:%s\n", userDirConfig.c_str());
-      settings::write(userDirConfig.c_str(), settings);
-
-      skipPrint = true;
-    }
-    else if ((0 == strcasecmp("-s", argv[i])) ||
-             (0 == strcasecmp("--sendfrom", argv[i]))) {
-      i++;
-      if (i < argc) {
-        if (0 != char(*argv[i])) {
-          realpath(argv[i], fileNameBuffer);
-          settings.sendfrompath = fileNameBuffer;
-        }
-        else {
-          settings.sendfrompath.erase();
-        }
-
-        fprintf(stderr, "Saving settings at:%s\n", userDirConfig.c_str());
-        settings::write(userDirConfig.c_str(), settings);
-        skipPrint = true;
-      }
-      else {
-        fprintf(stderr, "Syntax Error. Not enough args: %s\n", argv[i-1]);
-        exit(-1);
-      }
-    }
-    else if ((0 == strcasecmp("-o", argv[i])) ||
-             (0 == strcasecmp("--output", argv[i]))) {
-      i++;
-      if (i < argc) {
-        if (0 != char(*argv[i])) {
-          realpath(argv[i], fileNameBuffer);
-          settings.outputpath = fileNameBuffer;
-        }
-        else {
-          settings.outputpath.erase();
-        }
-
-        fprintf(stderr, "Saving settings at:%s\n",
-                        userDirConfig.c_str());
-        settings::write(userDirConfig.c_str(), settings);
-        skipPrint = true;
-      }
-      else {
-        fprintf(stderr, "Syntax Error. Not enough args: %s\n", argv[i-1]); 
-        exit(-1);
-      }
-    }
-    else if (0 == strcasecmp("--import", argv[i])) {
-      i++;
-      if (i < argc) {
-        if (0 != char(*argv[i])) {
-          realpath(argv[i], fileNameBuffer);
-          bool isUserDirConfig = settings::read(fileNameBuffer, settings);
-          if (isUserDirConfig) {
-#ifdef DEBUG
-            fprintf(stderr, "Successfully loaded config file:%s\n",
-                    fileNameBuffer);
-#endif
-          }
-          else {
-            fprintf(stderr, "Missing file:%s\n", fileNameBuffer);
-          }
-        }
-      }
-      else {
-        fprintf(stderr, "Syntax Error. Not enough args: %s\n", argv[i-1]); 
-        exit(-1);
-      }
-    }
-    else if (0 == strcasecmp("--export", argv[i])) {
-      i++;
-      if (i < argc) {
-        if (0 != char(*argv[i])) {
-          realpath(argv[i], fileNameBuffer);
-          settings::write(fileNameBuffer, settings);
-        }
-      }
-      else {
-        fprintf(stderr, "Syntax Error. Not enough args: %s\n", argv[i-1]); 
-        exit(-1);
-      }
-    }
-    else if (0 == strcasecmp("--svg", argv[i] )) {
-      printMode = kSVG;
-    }
-    else if (0 == strcasecmp("--ps", argv[i])) {
-      printMode = kPS;
-    }
-    else if (0 == strcasecmp("--preview", argv[i])) {
-      settings.preview = true;
-    }
-    else {
-      sendtoData = argv[i];
-      skipPrint = false;
-    }
-  }
-
-  if (skipPrint) {
-    exit(0);
-  }
-
-  cairo_surface_t* cs;
-  if (!settings.outputpath.empty()) {
-    switch(printMode) {
+  cairo_surface_t* cs = nullptr;
+  if (0 != strlen(aFileName)) {
+    switch(aMode) {
     case kSVG:
-      cs = cairo_svg_surface_create(settings.outputpath.c_str(),
-                                    HAGAKI_WIDTH_PT, HAGAKI_HEIGHT_PT);
+      cs = cairo_svg_surface_create(aFileName, w, h);
       break;
     case kPS:
-      cs = cairo_ps_surface_create(settings.outputpath.c_str(),
-                                   HAGAKI_WIDTH_PT, HAGAKI_HEIGHT_PT);
+      cs = cairo_ps_surface_create(aFileName, w, h);
       break;
     default:
-      cs = cairo_pdf_surface_create(settings.outputpath.c_str(),
-                                    HAGAKI_WIDTH_PT, HAGAKI_HEIGHT_PT);
+      cs = cairo_pdf_surface_create(aFileName, w, h);
     }
   }
   else {
-    switch(printMode) {
+    switch(aMode) {
     case kSVG:
-      cs = cairo_svg_surface_create_for_stream(caStdout, nullptr,
-                                               HAGAKI_WIDTH_PT,
-                                               HAGAKI_HEIGHT_PT);
+      cs = cairo_svg_surface_create_for_stream(caStdout, nullptr, w, h);
       break;
     case kPS:
-      cs = cairo_ps_surface_create_for_stream(caStdout, nullptr,
-                                              HAGAKI_WIDTH_PT,
-                                              HAGAKI_HEIGHT_PT);
+      cs = cairo_ps_surface_create_for_stream(caStdout, nullptr, w, h);
       break;
     default:
-      cs = cairo_pdf_surface_create_for_stream(caStdout, nullptr,
-                                               HAGAKI_WIDTH_PT,
-                                               HAGAKI_HEIGHT_PT);
+      cs = cairo_pdf_surface_create_for_stream(caStdout, nullptr, w, h);
     }
   }
   cairo_surface_set_fallback_resolution(cs, X_RESOLUTION, Y_RESOLUTION);
 
-  FT_Library ftlib;
-  FT_Error fte = FT_Init_FreeType(&ftlib);
-
-  if (fte) {
-    fprintf(stderr, "FT_Init_FreeType:0x%x\n", fte);
-    exit(-1);
-  }
-
-  FT_Face ftSelectedFont;
-
-  FcInit();
-#ifdef PRINTHA_USE_DEFAULT_FONT
-  FcConfigAppFontAddFile(nullptr, kDataDirFontFile);
-#endif
-#ifdef PRINTHA_USE_DEFAULT_ZIPCODE_FONT
-  FcConfigAppFontAddFile(nullptr, kDataDirZipcodeFontFile);
-#endif
-
-  int fontindex = 0;
-  const char* fontpath = nullptr;
-  FcPattern* fcFont = nullptr;
-  if (settings.fontpath.empty()) {
-    const char* fontface = (settings.font.empty())?
-                             "Serif" : settings.font.c_str();
-    FcPattern* pattern = FcNameParse((const FcChar8*) fontface);
-    FcConfigSubstitute(nullptr, pattern, FcMatchPattern);
-    FcDefaultSubstitute(pattern);
-
-    FcResult fcResult;
-    FcPatternAddBool(pattern, FC_VERTICAL_LAYOUT, FcTrue);
-    fcFont = FcFontMatch(nullptr, pattern, &fcResult);
-    FcPatternDestroy(pattern);
-
-    FcChar8* ufontpath;
-    FcPatternGetString(fcFont, FC_FILE, 0, &ufontpath);
-    fontpath = (const char*)(ufontpath);
-
-    FcPatternGetInteger(fcFont, FC_INDEX, 0, &fontindex);
-  }
-  else {
-    fontpath = settings.fontpath.c_str();
-  }
-
-  fte = FT_New_Face(ftlib, fontpath, fontindex, &ftSelectedFont);
-  FcPatternDestroy(fcFont);
-
-  if (fte) {
-    fprintf(stderr, "FT_New_Face:0x%x, %s\n", fte, settings.fontpath.c_str());
-    exit(-1);
-  }
-
-  if (sendtoData.empty()) {
-    std::cin >> std::noskipws;
-    std::getline(std::cin, sendtoData, char(0));
-
-    // XXX I'm not too sure what inserts this line feed. Shell?
-    //     Cut it off anyway.
-    if (sendtoData.size() > 0 && '\n' == char(*(sendtoData.end() - 1))) {
-      sendtoData.resize(sendtoData.size() - 1);
-    }
-  }
-
-  if (!sendtoData.empty()) {
-    if (kSVG == printMode) {
-      printPage(ftSelectedFont, cs, sendtoData, settings);
-    }
-    else {
-      std::istringstream iss(sendtoData);
-      std::string row;
-      while (std::getline(iss, row, settings.pagedelimiter)) {
-        printPage(ftSelectedFont, cs, row, settings);
-      }
-    }
-  }
-
-  cairo_surface_flush(cs);
-  cairo_surface_destroy(cs);
-  FT_Done_FreeType(ftlib);
-  return 0;
+  return cs;
 }
+
+} // namespace printha
+

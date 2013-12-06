@@ -19,7 +19,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#include "printha.h"
+#include "printha_settings.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
