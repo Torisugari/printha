@@ -90,7 +90,7 @@ sendto.name.Bottom             false
 sendto.name.LineBreak          \n
 
 # 以下、sendto.addrは宛先の住所のデータであることを指す。
-sendto.addr.rect               219.464567 80.000000 283.464567 330.000000
+sendto.addr.rect               209.464567 80.000000 273.464567 330.000000
 sendto.addr.fontsize           20.000000
 sendto.addr.whitespace         0.4
 sendto.addr.stretch            false
@@ -153,14 +153,14 @@ sendto.drawzipframe            false
 sendfrom.dlmt                  ;
 sendfrom.zipfontsize           12.000000
 
-sendfrom.name.rect             0.000000 200.000000 32.000000 340.000000
+sendfrom.name.rect             10.000000 200.000000 42.000000 340.000000
 sendfrom.name.fontsize         32.000000
 sendfrom.name.whitespace       0.400000
 sendfrom.name.stretch          true 
 sendfrom.name.bottom           false
 sendfrom.name.linebreak        \n
 
-sendfrom.addr.rect             32.000000 160.000000 80.000000 340.000000
+sendfrom.addr.rect             42.000000 160.000000 90.000000 340.000000
 sendfrom.addr.fontsize         20.000000
 sendfrom.addr.whitespace       0.000000
 sendfrom.addr.stretch          false
