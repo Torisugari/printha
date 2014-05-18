@@ -51,6 +51,21 @@ set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -DDEBUG")
 set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 
+# Settings for clang's static-analyzer.
+# Just type "make scan" in advance to "scan-build -V make".
+ADD_CUSTOM_TARGET(scan
+                    ${CMAKE_COMMAND}
+                      -DCMAKE_BUILD_TYPE:STRING=Scan ${PROJECT_SOURCE_DIR})
+
+if (CMAKE_BUILD_TYPE MATCHES "Scan")
+  set(CMAKE_C_FLAGS "-Wall -O2 -DNDEBUG")
+  set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -O2 -DNDEBUG")
+
+  # Why do I have to set full-pathes? No pkg-config file?
+  set(CMAKE_C_COMPILER "/usr/share/clang/scan-build/ccc-analyzer")
+  set(CMAKE_CXX_COMPILER "/usr/share/clang/scan-build/c++-analyzer")
+endif(CMAKE_BUILD_TYPE MATCHES "Scan")
+
 # Make sure to link to Harfbuzz's since it may be installed locally atm.
 option(USE_LOCAL_HARFBUZZ "Use local harfbuzz instead of distro's" OFF)
 if(USE_LOCAL_HARFBUZZ)
